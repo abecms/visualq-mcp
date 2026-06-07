@@ -9,7 +9,7 @@ import { registerTools } from './tools.js'
 export function createMcpServer(client: VisualQClient): McpServer {
   const server = new McpServer({
     name: 'visualq',
-    version: '0.1.0',
+    version: '0.2.0',
   })
 
   registerTools(server, client, manifestTools())

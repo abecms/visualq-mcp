@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-06-07T22:55:33.100Z",
+  "generatedAt": "2026-06-07T23:38:58.995Z",
   "tools": [
     {
       "name": "list_projects",
@@ -402,6 +402,189 @@
           }
         }
       }
+    },
+    {
+      "name": "approve_vrt_results",
+      "description": "Approve failed VRT results and promote them to baselines. Requires confirm: true and explicit scenario list.",
+      "source": "invoke",
+      "phase": 3,
+      "mutating": true,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string"
+          },
+          "environment": {
+            "type": "string"
+          },
+          "runId": {
+            "type": "string"
+          },
+          "scenarios": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Scenario labels to approve"
+          },
+          "viewports": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "browsers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "confirm": {
+            "type": "boolean",
+            "description": "Must be true to execute"
+          }
+        },
+        "required": [
+          "scenarios",
+          "confirm"
+        ]
+      },
+      "required": [
+        "scenarios",
+        "confirm"
+      ]
+    },
+    {
+      "name": "create_comparison_rule",
+      "description": "Add a VRT comparison rule (ignore, dynamic, layout_only) on a scenario. Requires confirm: true.",
+      "source": "invoke",
+      "phase": 3,
+      "mutating": true,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string"
+          },
+          "scenarioLabel": {
+            "type": "string"
+          },
+          "selector": {
+            "type": "string"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "full",
+              "layout_only",
+              "ignore",
+              "dynamic"
+            ]
+          },
+          "reason": {
+            "type": "string"
+          },
+          "confirm": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "scenarioLabel",
+          "selector",
+          "mode",
+          "confirm"
+        ]
+      },
+      "required": [
+        "scenarioLabel",
+        "selector",
+        "mode",
+        "confirm"
+      ]
+    },
+    {
+      "name": "run_frt_feature",
+      "description": "Run an FRT feature test suite. Requires confirm: true.",
+      "source": "invoke",
+      "phase": 3,
+      "mutating": true,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string"
+          },
+          "environment": {
+            "type": "string"
+          },
+          "featureId": {
+            "type": "string"
+          },
+          "scenarioFilter": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "browsers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "confirm": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "featureId",
+          "confirm"
+        ]
+      },
+      "required": [
+        "featureId",
+        "confirm"
+      ]
+    },
+    {
+      "name": "post_pr_comment",
+      "description": "Post or update a VisualQ VRT summary comment on a GitHub PR (requires GitHub integration).",
+      "source": "invoke",
+      "phase": 3,
+      "mutating": true,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string"
+          },
+          "prNumber": {
+            "type": "number"
+          },
+          "runId": {
+            "type": "string"
+          },
+          "environment": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string",
+            "description": "Optional custom markdown body"
+          },
+          "confirm": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "prNumber",
+          "confirm"
+        ]
+      },
+      "required": [
+        "prNumber",
+        "confirm"
+      ]
     }
   ]
 }

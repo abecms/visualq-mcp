@@ -19,5 +19,5 @@ export interface ToolsManifest {
 export const TOOLS_MANIFEST = manifest as ToolsManifest
 
 export function manifestTools(): ManifestTool[] {
-  return TOOLS_MANIFEST.tools.filter(t => t.phase <= 2)
+  return TOOLS_MANIFEST.tools.filter(t => t.phase <= 3)
 }

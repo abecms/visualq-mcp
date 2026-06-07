@@ -20,6 +20,8 @@ function baseArgsSchema(tool: ManifestTool) {
       shape[key] = z.array(z.string()).optional()
     } else if (spec.type === 'number') {
       shape[key] = z.number().optional()
+    } else if (spec.type === 'boolean') {
+      shape[key] = z.boolean().optional()
     }
   }
 

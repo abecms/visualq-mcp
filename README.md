@@ -29,6 +29,25 @@ Create an API key in VisualQ: **Project → Settings → API keys** (prefix `vq_
 
 **Phase 2:** `get_run_history`, `get_scenario_details`, `compare_runs`, `check_setup_health`, `explain_vrt_failure`, `perf_get_latest_report`, `seo_get_report`, `a11y_get_report`, `tracking_get_plan`
 
+**Phase 3 (write — `confirm: true` required):** `approve_vrt_results`, `create_comparison_rule`, `run_frt_feature`, `post_pr_comment`
+
+## API key scopes
+
+| Scope | MCP read | MCP write | CI runs |
+|-------|----------|-----------|---------|
+| `ci` | no | no | yes |
+| `mcp_read` | yes | no | no |
+| `mcp_full` | yes | yes | yes |
+
+Existing keys without a scope default to `mcp_full`. Create scoped keys in **Project → Settings → API Keys** (optional `scope` field in API).
+
+## Streamable HTTP (optional)
+
+```bash
+VISUALQ_API_KEY=vq_live_… npx -y @visualq/mcp --http
+# → http://127.0.0.1:3847/mcp
+```
+
 ## Development
 
 ```bash
