@@ -1,0 +1,46 @@
+{
+  "name": "@visualq/mcp",
+  "version": "0.1.0",
+  "description": "MCP server for VisualQ — run VRT, read failures, and diagnose from your IDE",
+  "type": "module",
+  "bin": {
+    "visualq-mcp": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "tools-manifest.json",
+    "examples"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "type-check": "tsc --noEmit",
+    "test": "vitest run",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "mcp",
+    "visualq",
+    "vrt",
+    "visual-regression",
+    "cursor",
+    "model-context-protocol"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/abecms/visualq-mcp"
+  },
+  "homepage": "https://visualq.ai",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "typescript": "~5.8.0",
+    "vitest": "^3.1.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

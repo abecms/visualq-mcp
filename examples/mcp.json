@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "visualq": {
+      "command": "npx",
+      "args": ["-y", "@visualq/mcp"],
+      "env": {
+        "VISUALQ_API_KEY": "vq_live_YOUR_KEY_HERE",
+        "VISUALQ_BASE_URL": "https://visualq.ai"
+      }
+    }
+  }
+}

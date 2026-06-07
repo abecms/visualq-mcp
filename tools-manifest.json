@@ -1,0 +1,407 @@
+{
+  "version": 1,
+  "generatedAt": "2026-06-07T22:55:33.100Z",
+  "tools": [
+    {
+      "name": "list_projects",
+      "description": "List projects accessible with the current credentials.",
+      "source": "ci",
+      "phase": 1,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "list_scenarios",
+      "description": "List VRT scenarios (labels, URLs, viewports) for the project.",
+      "source": "invoke",
+      "phase": 1,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          }
+        }
+      }
+    },
+    {
+      "name": "run_vrt",
+      "description": "Run a VRT comparison against baselines.",
+      "source": "ci",
+      "phase": 1,
+      "mutating": true,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string"
+          },
+          "environment": {
+            "type": "string"
+          },
+          "scenarios": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "browsers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "run_baseline",
+      "description": "Capture new VRT baselines.",
+      "source": "ci",
+      "phase": 1,
+      "mutating": true,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string"
+          },
+          "environment": {
+            "type": "string"
+          },
+          "scenarios": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "browsers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "get_run_status",
+      "description": "Get status and summary for a run.",
+      "source": "ci",
+      "phase": 1,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "runId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "runId"
+        ]
+      },
+      "required": [
+        "runId"
+      ]
+    },
+    {
+      "name": "wait_for_run",
+      "description": "Poll until a run completes or times out.",
+      "source": "client",
+      "phase": 1,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "runId": {
+            "type": "string"
+          },
+          "maxWaitMs": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "runId"
+        ]
+      },
+      "required": [
+        "runId"
+      ]
+    },
+    {
+      "name": "get_run_failures",
+      "description": "List failed scenarios with mismatch % from a VRT run (batch, no images).",
+      "source": "invoke",
+      "phase": 1,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string"
+          },
+          "environment": {
+            "type": "string"
+          },
+          "runId": {
+            "type": "string",
+            "description": "Defaults to latest completed VRT run"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_diff_stats",
+      "description": "Detailed diff stats for one scenario from the latest VRT run.",
+      "source": "invoke",
+      "phase": 1,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string"
+          },
+          "environment": {
+            "type": "string"
+          },
+          "scenarioLabel": {
+            "type": "string"
+          },
+          "viewport": {
+            "type": "string",
+            "enum": [
+              "phone",
+              "tablet",
+              "desktop"
+            ]
+          }
+        },
+        "required": [
+          "scenarioLabel"
+        ]
+      },
+      "required": [
+        "scenarioLabel"
+      ]
+    },
+    {
+      "name": "get_quality_score",
+      "description": "Composite quality score and pillar breakdown for the project.",
+      "source": "invoke",
+      "phase": 1,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_run_history",
+      "description": "Recent VRT and audit runs for the project.",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string"
+          },
+          "environment": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_scenario_details",
+      "description": "Full configuration for one VRT scenario.",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string"
+          },
+          "scenarioLabel": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "scenarioLabel"
+        ]
+      },
+      "required": [
+        "scenarioLabel"
+      ]
+    },
+    {
+      "name": "compare_runs",
+      "description": "Compare metrics between two runs.",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string"
+          },
+          "runIdA": {
+            "type": "string"
+          },
+          "runIdB": {
+            "type": "string"
+          },
+          "pillar": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "runIdA",
+          "runIdB"
+        ]
+      },
+      "required": [
+        "runIdA",
+        "runIdB"
+      ]
+    },
+    {
+      "name": "check_setup_health",
+      "description": "Project setup blockers and warnings before running audits.",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string"
+          },
+          "includeEnvironments": {
+            "type": "boolean"
+          },
+          "includeIntegrations": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    {
+      "name": "explain_vrt_failure",
+      "description": "Structured VRT failure analysis with hypotheses and next actions.",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string"
+          },
+          "environment": {
+            "type": "string"
+          },
+          "scenarioLabel": {
+            "type": "string"
+          },
+          "viewport": {
+            "type": "string",
+            "enum": [
+              "phone",
+              "tablet",
+              "desktop"
+            ]
+          }
+        },
+        "required": [
+          "scenarioLabel"
+        ]
+      },
+      "required": [
+        "scenarioLabel"
+      ]
+    },
+    {
+      "name": "perf_get_latest_report",
+      "description": "Latest performance audit report.",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "seo_get_report",
+      "description": "Latest SEO audit report.",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "a11y_get_report",
+      "description": "Latest accessibility audit report.",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "tracking_get_plan",
+      "description": "Analytics tracking plan for the project.",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  ]
+}
