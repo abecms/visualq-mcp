@@ -13,7 +13,8 @@ export function registerPrompts(server: McpServer) {
             'Diagnose the latest VisualQ VRT failures for this project.',
             '1. Call get_run_failures to list failed scenarios with mismatch %.',
             '2. For the worst failure, call get_diff_stats with scenarioLabel and viewport.',
-            '3. Summarize likely causes (content rules, dynamic content, threshold) and suggest next steps.',
+            '3. Optionally inspect_page_dom on the scenario URL.',
+            '4. Summarize likely causes and suggest next steps.',
           ].join('\n'),
         },
       }],
@@ -33,7 +34,27 @@ export function registerPrompts(server: McpServer) {
             '1. run_vrt (use staging environment if the user mentioned it).',
             '2. wait_for_run until completed.',
             '3. get_run_failures — block merge if failed > 0.',
-            '4. get_quality_score for extra context.',
+            '4. get_site_health for rolling quality context.',
+          ].join('\n'),
+        },
+      }],
+    }),
+  )
+
+  server.prompt(
+    'setup-health-review',
+    'Review project setup health and recommend fixes',
+    async () => ({
+      messages: [{
+        role: 'user',
+        content: {
+          type: 'text',
+          text: [
+            'Review VisualQ setup health for this project.',
+            '1. check_setup_health with includeEnvironments and includeIntegrations.',
+            '2. get_site_health for rolling coverage.',
+            '3. list_scenarios — flag missing baselines.',
+            '4. Summarize blockers and next actions.',
           ].join('\n'),
         },
       }],

@@ -1,10 +1,10 @@
 {
   "name": "@visualq/mcp",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "MCP server for VisualQ — run VRT, read failures, and diagnose from your IDE",
   "type": "module",
   "bin": {
-    "visualq-mcp": "./dist/index.js"
+    "visualq-mcp": "dist/index.js"
   },
   "files": [
     "dist",

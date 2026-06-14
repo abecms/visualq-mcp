@@ -33,4 +33,36 @@ export function registerResources(server: McpServer, client: VisualQClient) {
       }
     },
   )
+
+  server.resource(
+    'site-health',
+    'visualq://site-health',
+    { description: 'Rolling site health with coverage and pillar rollups' },
+    async () => {
+      const result = await client.invokeTool('get_site_health', {})
+      return {
+        contents: [{
+          uri: 'visualq://site-health',
+          mimeType: 'application/json',
+          text: JSON.stringify(result, null, 2),
+        }],
+      }
+    },
+  )
+
+  server.resource(
+    'scenarios',
+    'visualq://scenarios',
+    { description: 'VRT scenario list for the project' },
+    async () => {
+      const result = await client.invokeTool('list_scenarios', {})
+      return {
+        contents: [{
+          uri: 'visualq://scenarios',
+          mimeType: 'application/json',
+          text: JSON.stringify(result, null, 2),
+        }],
+      }
+    },
+  )
 }

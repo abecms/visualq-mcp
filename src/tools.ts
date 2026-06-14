@@ -22,6 +22,8 @@ function baseArgsSchema(tool: ManifestTool) {
       shape[key] = z.number().optional()
     } else if (spec.type === 'boolean') {
       shape[key] = z.boolean().optional()
+    } else if (spec.type === 'object') {
+      shape[key] = z.record(z.unknown()).optional()
     }
   }
 
@@ -66,18 +68,42 @@ async function handleCiTool(client: VisualQClient, name: string, args: Record<st
     case 'run_vrt':
       return jsonText({
         ok: true,
-        data: await client.triggerRun({
-          type: 'test',
-          ...pickRunArgs(args),
-        }),
+        data: await client.triggerRun({ type: 'test', ...pickRunArgs(args) }),
       })
     case 'run_baseline':
       return jsonText({
         ok: true,
-        data: await client.triggerRun({
-          type: 'baseline',
-          ...pickRunArgs(args),
-        }),
+        data: await client.triggerRun({ type: 'baseline', ...pickRunArgs(args) }),
+      })
+    case 'run_perf':
+      return jsonText({
+        ok: true,
+        data: await client.triggerRun({ type: 'perf', ...pickRunArgs(args) }),
+      })
+    case 'run_seo':
+      return jsonText({
+        ok: true,
+        data: await client.triggerRun({ type: 'seo', ...pickRunArgs(args) }),
+      })
+    case 'run_tracking':
+      return jsonText({
+        ok: true,
+        data: await client.triggerRun({ type: 'tracking', ...pickRunArgs(args) }),
+      })
+    case 'run_a11y':
+      return jsonText({
+        ok: true,
+        data: await client.triggerRun({ type: 'a11y', ...pickRunArgs(args) }),
+      })
+    case 'run_security':
+      return jsonText({
+        ok: true,
+        data: await client.triggerRun({ type: 'security', ...pickRunArgs(args) }),
+      })
+    case 'run_full_audit':
+      return jsonText({
+        ok: true,
+        message: 'Trigger pillar runs separately: run_vrt, run_perf, run_seo, run_a11y, run_security, run_tracking. Then get_site_health.',
       })
     case 'get_run_status': {
       const runId = String(args.runId || '')
@@ -106,5 +132,12 @@ function pickRunArgs(args: Record<string, unknown>) {
   if (typeof args.environment === 'string') out.environment = args.environment
   if (Array.isArray(args.scenarios)) out.scenarios = args.scenarios
   if (Array.isArray(args.browsers)) out.browsers = args.browsers
+  if (typeof args.commitSha === 'string') out.commitSha = args.commitSha
+  if (typeof args.branch === 'string') out.branch = args.branch
+  if (typeof args.prNumber === 'number') out.prNumber = args.prNumber
+  if (typeof args.prUrl === 'string') out.prUrl = args.prUrl
+  if (typeof args.ciProvider === 'string') out.ciProvider = args.ciProvider
+  if (typeof args.jiraKey === 'string') out.jiraKey = args.jiraKey
+  if (args.perfBudgets && typeof args.perfBudgets === 'object') out.perfBudgets = args.perfBudgets
   return out
 }

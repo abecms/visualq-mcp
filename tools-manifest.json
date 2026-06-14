@@ -1,6 +1,6 @@
 {
-  "version": 1,
-  "generatedAt": "2026-06-08T14:17:35.407Z",
+  "version": 2,
+  "generatedAt": "2026-06-13T22:43:31.322Z",
   "tools": [
     {
       "name": "list_projects",
@@ -11,31 +11,12 @@
       "parameters": {
         "type": "object",
         "properties": {}
-      }
-    },
-    {
-      "name": "list_scenarios",
-      "description": "List VRT scenarios (labels, URLs, viewports) for the project.",
-      "source": "invoke",
-      "phase": 1,
-      "mutating": false,
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "project": {
-            "type": "string",
-            "description": "Project slug or id (optional with API key)"
-          },
-          "environment": {
-            "type": "string",
-            "description": "Environment slug or id"
-          }
-        }
-      }
+      },
+      "async": false
     },
     {
       "name": "run_vrt",
-      "description": "Run a VRT comparison against baselines.",
+      "description": "Run VRT comparison against baselines.",
       "source": "ci",
       "phase": 1,
       "mutating": true,
@@ -59,9 +40,28 @@
             "items": {
               "type": "string"
             }
+          },
+          "commitSha": {
+            "type": "string"
+          },
+          "branch": {
+            "type": "string"
+          },
+          "prNumber": {
+            "type": "number"
+          },
+          "prUrl": {
+            "type": "string"
+          },
+          "ciProvider": {
+            "type": "string"
+          },
+          "jiraKey": {
+            "type": "string"
           }
         }
-      }
+      },
+      "async": false
     },
     {
       "name": "run_baseline",
@@ -91,11 +91,171 @@
             }
           }
         }
-      }
+      },
+      "async": false
+    },
+    {
+      "name": "run_perf",
+      "description": "Run performance Lighthouse audit.",
+      "source": "ci",
+      "phase": 1,
+      "mutating": true,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string"
+          },
+          "environment": {
+            "type": "string"
+          },
+          "scenarios": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "perfBudgets": {
+            "type": "object"
+          }
+        }
+      },
+      "async": false
+    },
+    {
+      "name": "run_seo",
+      "description": "Run SEO audit.",
+      "source": "ci",
+      "phase": 1,
+      "mutating": true,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string"
+          },
+          "environment": {
+            "type": "string"
+          },
+          "scenarios": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "async": false
+    },
+    {
+      "name": "run_tracking",
+      "description": "Run analytics/tracking audit.",
+      "source": "ci",
+      "phase": 1,
+      "mutating": true,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string"
+          },
+          "environment": {
+            "type": "string"
+          }
+        }
+      },
+      "async": false
+    },
+    {
+      "name": "run_a11y",
+      "description": "Run accessibility audit.",
+      "source": "ci",
+      "phase": 1,
+      "mutating": true,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string"
+          },
+          "environment": {
+            "type": "string"
+          },
+          "scenarios": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "browsers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "async": false
+    },
+    {
+      "name": "run_security",
+      "description": "Run security scan.",
+      "source": "ci",
+      "phase": 1,
+      "mutating": true,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string"
+          },
+          "environment": {
+            "type": "string"
+          },
+          "scenarios": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "async": false
+    },
+    {
+      "name": "run_full_audit",
+      "description": "Run full multi-pillar audit (async job).",
+      "source": "ci",
+      "phase": 2,
+      "mutating": true,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string"
+          },
+          "environment": {
+            "type": "string"
+          },
+          "scenarios": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "pillars": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "async": false
     },
     {
       "name": "get_run_status",
-      "description": "Get status and summary for a run.",
+      "description": "Get run status and summary.",
       "source": "ci",
       "phase": 1,
       "mutating": false,
@@ -110,13 +270,11 @@
           "runId"
         ]
       },
-      "required": [
-        "runId"
-      ]
+      "async": false
     },
     {
       "name": "wait_for_run",
-      "description": "Poll until a run completes or times out.",
+      "description": "Poll until run completes.",
       "source": "client",
       "phase": 1,
       "mutating": false,
@@ -134,13 +292,32 @@
           "runId"
         ]
       },
-      "required": [
-        "runId"
-      ]
+      "async": false
+    },
+    {
+      "name": "list_scenarios",
+      "description": "List VRT scenarios for the project.",
+      "source": "invoke",
+      "phase": 1,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          }
+        }
+      },
+      "async": false
     },
     {
       "name": "get_run_failures",
-      "description": "List failed scenarios with mismatch % from a VRT run (batch, no images).",
+      "description": "Failed scenarios with mismatch % from a VRT run.",
       "source": "invoke",
       "phase": 1,
       "mutating": false,
@@ -148,169 +325,23 @@
         "type": "object",
         "properties": {
           "project": {
-            "type": "string"
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
           },
           "environment": {
-            "type": "string"
+            "type": "string",
+            "description": "Environment slug or id"
           },
           "runId": {
-            "type": "string",
-            "description": "Defaults to latest completed VRT run"
+            "type": "string"
           }
         }
-      }
-    },
-    {
-      "name": "get_diff_stats",
-      "description": "Detailed diff stats for one scenario from the latest VRT run.",
-      "source": "invoke",
-      "phase": 1,
-      "mutating": false,
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "project": {
-            "type": "string"
-          },
-          "environment": {
-            "type": "string"
-          },
-          "scenarioLabel": {
-            "type": "string"
-          },
-          "viewport": {
-            "type": "string",
-            "enum": [
-              "phone",
-              "tablet",
-              "desktop"
-            ]
-          }
-        },
-        "required": [
-          "scenarioLabel"
-        ]
       },
-      "required": [
-        "scenarioLabel"
-      ]
-    },
-    {
-      "name": "get_quality_score",
-      "description": "Composite quality score and pillar breakdown for the project.",
-      "source": "invoke",
-      "phase": 1,
-      "mutating": false,
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "project": {
-            "type": "string"
-          }
-        }
-      }
-    },
-    {
-      "name": "get_run_history",
-      "description": "Recent VRT and audit runs for the project.",
-      "source": "invoke",
-      "phase": 2,
-      "mutating": false,
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "project": {
-            "type": "string"
-          },
-          "environment": {
-            "type": "string"
-          },
-          "limit": {
-            "type": "number"
-          }
-        }
-      }
-    },
-    {
-      "name": "get_scenario_details",
-      "description": "Full configuration for one VRT scenario.",
-      "source": "invoke",
-      "phase": 2,
-      "mutating": false,
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "project": {
-            "type": "string"
-          },
-          "scenarioLabel": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "scenarioLabel"
-        ]
-      },
-      "required": [
-        "scenarioLabel"
-      ]
-    },
-    {
-      "name": "compare_runs",
-      "description": "Compare metrics between two runs.",
-      "source": "invoke",
-      "phase": 2,
-      "mutating": false,
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "project": {
-            "type": "string"
-          },
-          "runIdA": {
-            "type": "string"
-          },
-          "runIdB": {
-            "type": "string"
-          },
-          "pillar": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "runIdA",
-          "runIdB"
-        ]
-      },
-      "required": [
-        "runIdA",
-        "runIdB"
-      ]
-    },
-    {
-      "name": "check_setup_health",
-      "description": "Project setup blockers and warnings before running audits.",
-      "source": "invoke",
-      "phase": 2,
-      "mutating": false,
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "project": {
-            "type": "string"
-          },
-          "includeEnvironments": {
-            "type": "boolean"
-          },
-          "includeIntegrations": {
-            "type": "boolean"
-          }
-        }
-      }
+      "async": false
     },
     {
       "name": "explain_vrt_failure",
-      "description": "Structured VRT failure analysis with hypotheses and next actions.",
+      "description": "Structured VRT failure analysis.",
       "source": "invoke",
       "phase": 2,
       "mutating": false,
@@ -318,94 +349,32 @@
         "type": "object",
         "properties": {
           "project": {
-            "type": "string"
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
           },
           "environment": {
-            "type": "string"
+            "type": "string",
+            "description": "Environment slug or id"
           },
           "scenarioLabel": {
             "type": "string"
           },
           "viewport": {
-            "type": "string",
-            "enum": [
-              "phone",
-              "tablet",
-              "desktop"
-            ]
+            "type": "string"
+          },
+          "runId": {
+            "type": "string"
           }
-        },
-        "required": [
-          "scenarioLabel"
-        ]
+        }
       },
+      "async": false,
       "required": [
         "scenarioLabel"
       ]
     },
     {
-      "name": "perf_get_latest_report",
-      "description": "Latest performance audit report.",
-      "source": "invoke",
-      "phase": 2,
-      "mutating": false,
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "project": {
-            "type": "string"
-          }
-        }
-      }
-    },
-    {
-      "name": "seo_get_report",
-      "description": "Latest SEO audit report.",
-      "source": "invoke",
-      "phase": 2,
-      "mutating": false,
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "project": {
-            "type": "string"
-          }
-        }
-      }
-    },
-    {
-      "name": "a11y_get_report",
-      "description": "Latest accessibility audit report.",
-      "source": "invoke",
-      "phase": 2,
-      "mutating": false,
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "project": {
-            "type": "string"
-          }
-        }
-      }
-    },
-    {
-      "name": "tracking_get_plan",
-      "description": "Analytics tracking plan for the project.",
-      "source": "invoke",
-      "phase": 2,
-      "mutating": false,
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "project": {
-            "type": "string"
-          }
-        }
-      }
-    },
-    {
       "name": "approve_vrt_results",
-      "description": "Approve failed VRT results and promote them to baselines. Requires confirm: true and explicit scenario list.",
+      "description": "Approve failed VRT results as baselines.",
       "source": "invoke",
       "phase": 3,
       "mutating": true,
@@ -413,10 +382,12 @@
         "type": "object",
         "properties": {
           "project": {
-            "type": "string"
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
           },
           "environment": {
-            "type": "string"
+            "type": "string",
+            "description": "Environment slug or id"
           },
           "runId": {
             "type": "string"
@@ -425,8 +396,7 @@
             "type": "array",
             "items": {
               "type": "string"
-            },
-            "description": "Scenario labels to approve"
+            }
           },
           "viewports": {
             "type": "array",
@@ -442,22 +412,19 @@
           },
           "confirm": {
             "type": "boolean",
-            "description": "Must be true to execute"
+            "description": "Must be true for mutating tools"
           }
-        },
-        "required": [
-          "scenarios",
-          "confirm"
-        ]
+        }
       },
+      "async": false,
       "required": [
         "scenarios",
         "confirm"
       ]
     },
     {
-      "name": "create_comparison_rule",
-      "description": "Add a VRT comparison rule (ignore, dynamic, layout_only) on a scenario. Requires confirm: true.",
+      "name": "post_pr_comment",
+      "description": "Post VisualQ summary on a GitHub PR.",
       "source": "invoke",
       "phase": 3,
       "mutating": true,
@@ -465,7 +432,930 @@
         "type": "object",
         "properties": {
           "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
+          "prNumber": {
+            "type": "number"
+          },
+          "runId": {
             "type": "string"
+          },
+          "body": {
+            "type": "string"
+          },
+          "confirm": {
+            "type": "boolean",
+            "description": "Must be true for mutating tools"
+          }
+        }
+      },
+      "async": false,
+      "required": [
+        "prNumber",
+        "confirm"
+      ]
+    },
+    {
+      "name": "get_site_health",
+      "description": "Rolling site health with coverage and pillar rollups.",
+      "source": "invoke",
+      "phase": 1,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          }
+        }
+      },
+      "async": false
+    },
+    {
+      "name": "get_page_health",
+      "description": "Rolling health for one page/scenario.",
+      "source": "invoke",
+      "phase": 1,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
+          "pageId": {
+            "type": "string"
+          },
+          "scenarioLabel": {
+            "type": "string"
+          }
+        }
+      },
+      "async": false
+    },
+    {
+      "name": "get_run_report",
+      "description": "Slim VRT run report with signed image URLs.",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
+          "runId": {
+            "type": "string"
+          }
+        }
+      },
+      "async": false
+    },
+    {
+      "name": "create_content_rule",
+      "description": "Add content normalization rule on a scenario.",
+      "source": "invoke",
+      "phase": 3,
+      "mutating": true,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
+          "scenarioLabel": {
+            "type": "string"
+          },
+          "selector": {
+            "type": "string"
+          },
+          "normalize": {
+            "type": "string",
+            "enum": [
+              "text",
+              "images",
+              "all-content"
+            ]
+          },
+          "viewport": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "confirm": {
+            "type": "boolean",
+            "description": "Must be true for mutating tools"
+          }
+        }
+      },
+      "async": false,
+      "required": [
+        "scenarioLabel",
+        "selector",
+        "normalize",
+        "confirm"
+      ]
+    },
+    {
+      "name": "crawl_site",
+      "description": "Crawl site URLs via Firecrawl map (async).",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "baseUrl": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "baseUrl"
+        ]
+      },
+      "async": true
+    },
+    {
+      "name": "generate_scenarios",
+      "description": "Generate VRT scenario suggestions from crawled URLs (async).",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "urls": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "async": true
+    },
+    {
+      "name": "analyze_results",
+      "description": "AI analysis of latest VRT diff results.",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
+          "runId": {
+            "type": "string"
+          },
+          "scenarioLabel": {
+            "type": "string"
+          }
+        }
+      },
+      "async": false
+    },
+    {
+      "name": "get_job_status",
+      "description": "Poll async MCP job status and result.",
+      "source": "invoke",
+      "phase": 1,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "jobId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "jobId"
+        ]
+      },
+      "async": false
+    },
+    {
+      "name": "list_my_tools",
+      "description": "List MCP tools available for this API key and plan.",
+      "source": "invoke",
+      "phase": 1,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {}
+      },
+      "async": false
+    },
+    {
+      "name": "agent_start_recording",
+      "description": "Start headless NL agent recording session.",
+      "source": "invoke",
+      "phase": 3,
+      "mutating": true,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
+          "objective": {
+            "type": "string"
+          },
+          "startUrl": {
+            "type": "string"
+          },
+          "maxTurns": {
+            "type": "number"
+          },
+          "confirm": {
+            "type": "boolean",
+            "description": "Must be true for mutating tools"
+          }
+        }
+      },
+      "async": false,
+      "required": [
+        "objective",
+        "confirm"
+      ]
+    },
+    {
+      "name": "agent_recording_turn",
+      "description": "Execute one headless agent recording turn.",
+      "source": "invoke",
+      "phase": 3,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "sessionId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "sessionId"
+        ]
+      },
+      "async": false
+    },
+    {
+      "name": "agent_finish_recording",
+      "description": "Finish recording and synthesize FRT steps.",
+      "source": "invoke",
+      "phase": 3,
+      "mutating": true,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "sessionId": {
+            "type": "string"
+          },
+          "featureId": {
+            "type": "string"
+          },
+          "confirm": {
+            "type": "boolean",
+            "description": "Must be true for mutating tools"
+          }
+        }
+      },
+      "async": false,
+      "required": [
+        "sessionId",
+        "confirm"
+      ]
+    },
+    {
+      "name": "get_diff_stats",
+      "description": "Detailed diff stats for one scenario from the latest VRT run.",
+      "source": "invoke",
+      "phase": 1,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
+          "scenarioLabel": {
+            "type": "string"
+          },
+          "viewport": {
+            "type": "string",
+            "enum": [
+              "phone",
+              "tablet",
+              "desktop"
+            ]
+          }
+        }
+      },
+      "async": false,
+      "required": [
+        "scenarioLabel"
+      ]
+    },
+    {
+      "name": "get_quality_score",
+      "description": "Composite quality score from rolling page health.",
+      "source": "invoke",
+      "phase": 1,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          }
+        }
+      },
+      "async": false
+    },
+    {
+      "name": "get_run_history",
+      "description": "Recent VRT and audit runs.",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
+          "limit": {
+            "type": "number"
+          }
+        }
+      },
+      "async": false
+    },
+    {
+      "name": "get_scenario_details",
+      "description": "Full configuration for one VRT scenario.",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
+          "scenarioLabel": {
+            "type": "string"
+          }
+        }
+      },
+      "async": false,
+      "required": [
+        "scenarioLabel"
+      ]
+    },
+    {
+      "name": "compare_runs",
+      "description": "Compare metrics between two runs.",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
+          "runIdA": {
+            "type": "string"
+          },
+          "runIdB": {
+            "type": "string"
+          },
+          "pillar": {
+            "type": "string"
+          }
+        }
+      },
+      "async": false,
+      "required": [
+        "runIdA",
+        "runIdB"
+      ]
+    },
+    {
+      "name": "check_setup_health",
+      "description": "Project setup blockers and warnings.",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          }
+        }
+      },
+      "async": false
+    },
+    {
+      "name": "inspect_page_dom",
+      "description": "DOM map from baseline/test capture or Firecrawl.",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
+          "url": {
+            "type": "string"
+          },
+          "viewport": {
+            "type": "string"
+          }
+        }
+      },
+      "async": false
+    },
+    {
+      "name": "find_element_on_page",
+      "description": "Resolve a CSS selector for an element description on a page.",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
+          "url": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "viewport": {
+            "type": "string"
+          }
+        }
+      },
+      "async": false
+    },
+    {
+      "name": "suggest_scenario",
+      "description": "Suggest a VRT scenario from a URL scrape.",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      },
+      "async": false
+    },
+    {
+      "name": "get_page_groups",
+      "description": "Page group organization snapshot.",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          }
+        }
+      },
+      "async": false
+    },
+    {
+      "name": "perf_get_latest_report",
+      "description": "Latest performance audit report.",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          }
+        }
+      },
+      "async": false
+    },
+    {
+      "name": "perf_list_history",
+      "description": "Performance run history.",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          }
+        }
+      },
+      "async": false
+    },
+    {
+      "name": "seo_get_report",
+      "description": "Latest SEO audit report.",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          }
+        }
+      },
+      "async": false
+    },
+    {
+      "name": "seo_list_history",
+      "description": "SEO run history.",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          }
+        }
+      },
+      "async": false
+    },
+    {
+      "name": "a11y_get_report",
+      "description": "Latest accessibility audit report.",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          }
+        }
+      },
+      "async": false
+    },
+    {
+      "name": "a11y_list_history",
+      "description": "Accessibility run history.",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          }
+        }
+      },
+      "async": false
+    },
+    {
+      "name": "security_get_report",
+      "description": "Latest security scan report.",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          }
+        }
+      },
+      "async": false
+    },
+    {
+      "name": "security_list_history",
+      "description": "Security run history.",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          }
+        }
+      },
+      "async": false
+    },
+    {
+      "name": "tracking_get_plan",
+      "description": "Analytics tracking plan.",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          }
+        }
+      },
+      "async": false
+    },
+    {
+      "name": "recommend_next_action",
+      "description": "Highest-value next action from quality score and setup health.",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "pillar": {
+            "type": "string"
+          },
+          "goal": {
+            "type": "string"
+          },
+          "maxActions": {
+            "type": "number"
+          }
+        }
+      },
+      "async": false
+    },
+    {
+      "name": "prioritize_issues",
+      "description": "Rank open issues by impact.",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "pillar": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "number"
+          }
+        }
+      },
+      "async": false
+    },
+    {
+      "name": "generate_action_plan",
+      "description": "Structured remediation plan.",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "goal": {
+            "type": "string"
+          },
+          "pillar": {
+            "type": "string"
+          }
+        }
+      },
+      "async": false
+    },
+    {
+      "name": "identify_blockers_for_release",
+      "description": "Release blockers from latest runs and health.",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          }
+        }
+      },
+      "async": false
+    },
+    {
+      "name": "analyze_user_intent",
+      "description": "Classify user intent for routing.",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      },
+      "async": false
+    },
+    {
+      "name": "suggest_quick_scenarios",
+      "description": "Quick scenario suggestions from project context.",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          }
+        }
+      },
+      "async": false
+    },
+    {
+      "name": "create_comparison_rule",
+      "description": "Add VRT comparison rule on a scenario.",
+      "source": "invoke",
+      "phase": 3,
+      "mutating": true,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
           },
           "scenarioLabel": {
             "type": "string"
@@ -474,28 +1364,18 @@
             "type": "string"
           },
           "mode": {
-            "type": "string",
-            "enum": [
-              "full",
-              "layout_only",
-              "ignore",
-              "dynamic"
-            ]
+            "type": "string"
           },
           "reason": {
             "type": "string"
           },
           "confirm": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Must be true for mutating tools"
           }
-        },
-        "required": [
-          "scenarioLabel",
-          "selector",
-          "mode",
-          "confirm"
-        ]
+        }
       },
+      "async": false,
       "required": [
         "scenarioLabel",
         "selector",
@@ -505,7 +1385,7 @@
     },
     {
       "name": "run_frt_feature",
-      "description": "Run an FRT feature test suite. Requires confirm: true.",
+      "description": "Run an FRT feature test suite.",
       "source": "invoke",
       "phase": 3,
       "mutating": true,
@@ -513,10 +1393,12 @@
         "type": "object",
         "properties": {
           "project": {
-            "type": "string"
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
           },
           "environment": {
-            "type": "string"
+            "type": "string",
+            "description": "Environment slug or id"
           },
           "featureId": {
             "type": "string"
@@ -534,57 +1416,378 @@
             }
           },
           "confirm": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Must be true for mutating tools"
           }
-        },
-        "required": [
-          "featureId",
-          "confirm"
-        ]
+        }
       },
+      "async": false,
       "required": [
         "featureId",
         "confirm"
       ]
     },
     {
-      "name": "post_pr_comment",
-      "description": "Post or update a VisualQ VRT summary comment on a GitHub PR (requires GitHub integration).",
+      "name": "frt_search_step_library",
+      "description": "Search project FRT step library.",
+      "source": "invoke",
+      "phase": 3,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string"
+          },
+          "language": {
+            "type": "string"
+          }
+        }
+      },
+      "async": false
+    },
+    {
+      "name": "frt_get_step_def",
+      "description": "Get step definition by id.",
+      "source": "invoke",
+      "phase": 3,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "stepDefId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "stepDefId"
+        ]
+      },
+      "async": false
+    },
+    {
+      "name": "frt_validate_step_def",
+      "description": "Validate step definition Playwright body.",
+      "source": "invoke",
+      "phase": 3,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "stepDefId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "stepDefId"
+        ]
+      },
+      "async": false
+    },
+    {
+      "name": "frt_resolve_page",
+      "description": "Resolve page description to URL.",
+      "source": "invoke",
+      "phase": 3,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "description"
+        ]
+      },
+      "async": false
+    },
+    {
+      "name": "frt_inspect_page",
+      "description": "Inspect page for FRT grounding.",
+      "source": "invoke",
+      "phase": 3,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "pageDescription": {
+            "type": "string"
+          }
+        }
+      },
+      "async": false
+    },
+    {
+      "name": "frt_find_element",
+      "description": "Find element on page for FRT.",
+      "source": "invoke",
+      "phase": 3,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "async": false
+    },
+    {
+      "name": "frt_compile_feature",
+      "description": "Compile FRT feature to Playwright.",
+      "source": "invoke",
+      "phase": 3,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "featureId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "featureId"
+        ]
+      },
+      "async": false
+    },
+    {
+      "name": "frt_explain_failure",
+      "description": "Structured FRT failure analysis.",
+      "source": "invoke",
+      "phase": 3,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "runId": {
+            "type": "string"
+          },
+          "scenarioName": {
+            "type": "string"
+          },
+          "stepIndex": {
+            "type": "number"
+          }
+        }
+      },
+      "async": false
+    },
+    {
+      "name": "frt_create_step_def",
+      "description": "Create project step definition.",
       "source": "invoke",
       "phase": 3,
       "mutating": true,
       "parameters": {
         "type": "object",
         "properties": {
-          "project": {
+          "intent": {
             "type": "string"
           },
-          "prNumber": {
-            "type": "number"
-          },
-          "runId": {
+          "playwrightCode": {
             "type": "string"
           },
-          "environment": {
+          "gherkinPattern": {
             "type": "string"
-          },
-          "body": {
-            "type": "string",
-            "description": "Optional custom markdown body"
           },
           "confirm": {
+            "type": "boolean",
+            "description": "Must be true for mutating tools"
+          }
+        }
+      },
+      "async": false,
+      "required": [
+        "confirm"
+      ]
+    },
+    {
+      "name": "frt_update_step_def",
+      "description": "Update step definition body.",
+      "source": "invoke",
+      "phase": 3,
+      "mutating": true,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "stepDefId": {
+            "type": "string"
+          },
+          "playwrightCode": {
+            "type": "string"
+          },
+          "confirm": {
+            "type": "boolean",
+            "description": "Must be true for mutating tools"
+          }
+        }
+      },
+      "async": false,
+      "required": [
+        "stepDefId",
+        "confirm"
+      ]
+    },
+    {
+      "name": "frt_fork_step_def",
+      "description": "Fork step definition.",
+      "source": "invoke",
+      "phase": 3,
+      "mutating": true,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "stepDefId": {
+            "type": "string"
+          },
+          "confirm": {
+            "type": "boolean",
+            "description": "Must be true for mutating tools"
+          }
+        }
+      },
+      "async": false,
+      "required": [
+        "stepDefId",
+        "confirm"
+      ]
+    },
+    {
+      "name": "frt_generate_step_def",
+      "description": "Generate step definition from intent.",
+      "source": "invoke",
+      "phase": 3,
+      "mutating": true,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "intent": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "confirm": {
+            "type": "boolean",
+            "description": "Must be true for mutating tools"
+          }
+        }
+      },
+      "async": false,
+      "required": [
+        "intent",
+        "confirm"
+      ]
+    },
+    {
+      "name": "frt_heal_step_def",
+      "description": "Propose healed Playwright body for failing step.",
+      "source": "invoke",
+      "phase": 3,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "stepDefId": {
+            "type": "string"
+          },
+          "stepText": {
+            "type": "string"
+          },
+          "errorMessage": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "persist": {
             "type": "boolean"
+          },
+          "confirm": {
+            "type": "boolean",
+            "description": "Must be true for mutating tools"
+          }
+        }
+      },
+      "async": false
+    },
+    {
+      "name": "frt_save_feature_draft",
+      "description": "Persist FRT feature draft (scenarios, steps, meta).",
+      "source": "invoke",
+      "phase": 3,
+      "mutating": true,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "featureId": {
+            "type": "string"
+          },
+          "draft": {
+            "type": "object"
+          },
+          "confirm": {
+            "type": "boolean",
+            "description": "Must be true for mutating tools"
+          }
+        }
+      },
+      "async": false,
+      "required": [
+        "featureId",
+        "confirm"
+      ]
+    },
+    {
+      "name": "frt_propose_journey",
+      "description": "Propose FRT journey from goal (async).",
+      "source": "invoke",
+      "phase": 3,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "goal": {
+            "type": "string"
+          },
+          "startUrl": {
+            "type": "string"
           }
         },
         "required": [
-          "prNumber",
-          "confirm"
+          "goal"
         ]
       },
-      "required": [
-        "prNumber",
-        "confirm"
-      ]
+      "async": true
+    },
+    {
+      "name": "frt_explore_site",
+      "description": "Explore site flows for FRT (async).",
+      "source": "invoke",
+      "phase": 3,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "baseUrl": {
+            "type": "string"
+          },
+          "maxPages": {
+            "type": "number"
+          }
+        }
+      },
+      "async": true
     }
   ]
 }
