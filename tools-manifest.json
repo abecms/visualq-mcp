@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "generatedAt": "2026-06-13T22:43:31.322Z",
+  "generatedAt": "2026-06-15T19:43:58.719Z",
   "tools": [
     {
       "name": "list_projects",
@@ -265,12 +265,12 @@
           "runId": {
             "type": "string"
           }
-        },
-        "required": [
-          "runId"
-        ]
+        }
       },
-      "async": false
+      "async": false,
+      "required": [
+        "runId"
+      ]
     },
     {
       "name": "wait_for_run",
@@ -287,12 +287,12 @@
           "maxWaitMs": {
             "type": "number"
           }
-        },
-        "required": [
-          "runId"
-        ]
+        }
       },
-      "async": false
+      "async": false,
+      "required": [
+        "runId"
+      ]
     },
     {
       "name": "list_scenarios",
@@ -580,6 +580,124 @@
         "scenarioLabel",
         "selector",
         "normalize",
+        "confirm"
+      ]
+    },
+    {
+      "name": "create_scenario",
+      "description": "Persist a VRT scenario (page) in the project. Use after suggest_scenario to apply suggested selectors, delay, and threshold. Requires confirm: true.",
+      "source": "invoke",
+      "phase": 3,
+      "mutating": true,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
+          "label": {
+            "type": "string",
+            "description": "Scenario label (unique display name)"
+          },
+          "url": {
+            "type": "string",
+            "description": "Page URL to capture"
+          },
+          "captureBaseline": {
+            "type": "boolean",
+            "description": "Capture baseline after create (default true)"
+          },
+          "selectors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "delay": {
+            "type": "number"
+          },
+          "misMatchThreshold": {
+            "type": "number"
+          },
+          "removeSelectors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "clickSelectors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "requireSameDimensions": {
+            "type": "boolean"
+          },
+          "requiresAuth": {
+            "type": "boolean"
+          },
+          "authFeatureId": {
+            "type": "string"
+          },
+          "authScenarioName": {
+            "type": "string"
+          },
+          "contentRules": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "comparisonRules": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "viewports": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "label": {
+                  "type": "string"
+                },
+                "width": {
+                  "type": "number"
+                },
+                "height": {
+                  "type": "number"
+                }
+              }
+            }
+          },
+          "browsers": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "chromium",
+                "firefox",
+                "webkit"
+              ]
+            }
+          },
+          "confirm": {
+            "type": "boolean",
+            "description": "Must be true for mutating tools"
+          }
+        }
+      },
+      "async": false,
+      "required": [
+        "label",
+        "url",
         "confirm"
       ]
     },
@@ -1200,7 +1318,7 @@
     },
     {
       "name": "tracking_get_plan",
-      "description": "Analytics tracking plan.",
+      "description": "Tracking plan.",
       "source": "invoke",
       "phase": 2,
       "mutating": false,
