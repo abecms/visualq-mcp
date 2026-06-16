@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "generatedAt": "2026-06-15T19:43:58.719Z",
+  "generatedAt": "2026-06-16T21:53:37.839Z",
   "tools": [
     {
       "name": "list_projects",
@@ -527,6 +527,65 @@
           },
           "runId": {
             "type": "string"
+          }
+        }
+      },
+      "async": false
+    },
+    {
+      "name": "tracking_get_audit_report",
+      "description": "Tracking audit bilan summary (global score, suite PASS/FAIL/WARN/SKIP table). Uses latest audit when auditId is omitted.",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
+          "auditId": {
+            "type": "string",
+            "description": "Tracking audit id (defaults to latest for project/environment)"
+          }
+        }
+      },
+      "async": false
+    },
+    {
+      "name": "tracking_export_audit_report",
+      "description": "Export tracking audit report as xlsx, html, or pdf (base64 file payload). Uses latest audit when auditId is omitted.",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
+          "auditId": {
+            "type": "string",
+            "description": "Tracking audit id (defaults to latest for project/environment)"
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "xlsx",
+              "html",
+              "pdf"
+            ],
+            "description": "Export format (default xlsx)"
           }
         }
       },

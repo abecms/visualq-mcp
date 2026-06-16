@@ -27,7 +27,7 @@ Create an API key in VisualQ: **Project → Settings → API keys** (prefix `vq_
 
 **Phase 1:** `list_projects`, `list_scenarios`, `run_vrt`, `run_baseline`, `get_run_status`, `wait_for_run`, `get_run_failures`, `get_diff_stats`, `get_quality_score`
 
-**Phase 2:** `get_run_history`, `get_scenario_details`, `compare_runs`, `check_setup_health`, `explain_vrt_failure`, `perf_get_latest_report`, `seo_get_report`, `a11y_get_report`, `tracking_get_plan`
+**Phase 2:** `get_run_history`, `get_scenario_details`, `compare_runs`, `check_setup_health`, `explain_vrt_failure`, `perf_get_latest_report`, `seo_get_report`, `a11y_get_report`, `tracking_get_plan`, `tracking_get_audit_report`, `tracking_export_audit_report`
 
 **Phase 3 (write — `confirm: true` required):** `approve_vrt_results`, `create_scenario`, `create_comparison_rule`, `run_frt_feature`, `post_pr_comment`
 
