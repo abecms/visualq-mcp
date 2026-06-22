@@ -65,16 +65,35 @@ async function handleCiTool(client: VisualQClient, name: string, args: Record<st
       const projects = await client.listProjects()
       return jsonText({ ok: true, data: projects })
     }
-    case 'run_vrt':
+    case 'run_vrt': {
+      const data = await client.triggerRun({
+        type: 'test',
+        ...pickRunArgs(args),
+      })
       return jsonText({
         ok: true,
-        data: await client.triggerRun({ type: 'test', ...pickRunArgs(args) }),
+        summary: `VRT test started (${data.runId}).`,
+        data,
+        nextActions: [
+          { label: 'Wait for completion', tool: 'wait_for_run', args: { runId: data.runId } },
+          { label: 'Read failures when done', tool: 'get_run_failures', args: { runId: data.runId } },
+        ],
       })
-    case 'run_baseline':
+    }
+    case 'run_baseline': {
+      const data = await client.triggerRun({
+        type: 'baseline',
+        ...pickRunArgs(args),
+      })
       return jsonText({
         ok: true,
-        data: await client.triggerRun({ type: 'baseline', ...pickRunArgs(args) }),
+        summary: `Baseline capture started (${data.runId}).`,
+        data,
+        nextActions: [
+          { label: 'Wait for completion', tool: 'wait_for_run', args: { runId: data.runId } },
+        ],
       })
+    }
     case 'run_perf':
       return jsonText({
         ok: true,

@@ -1,4 +1,5 @@
 import manifest from '../tools-manifest.json' with { type: 'json' }
+import { toolsForProfile } from './profiles.js'
 
 export interface ManifestTool {
   name: string
@@ -19,5 +20,6 @@ export interface ToolsManifest {
 export const TOOLS_MANIFEST = manifest as ToolsManifest
 
 export function manifestTools(): ManifestTool[] {
-  return TOOLS_MANIFEST.tools.filter(t => t.phase <= 3)
+  const profile = process.env.VISUALQ_TOOL_PROFILE
+  return toolsForProfile(profile, TOOLS_MANIFEST.tools)
 }

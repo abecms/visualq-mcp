@@ -2,7 +2,33 @@
 
 MCP server for [VisualQ](https://visualq.ai) — run VRT, poll results, and read structured failure reports from Cursor, Claude Desktop, or any MCP client.
 
-## Quick start (Cursor)
+## Org agent key (recommended for Cursor)
+
+Use a **org-scoped** key (`vq_org_live_…`) from VisualQ **Settings → Agent API Keys**. One MCP config covers all projects — pass `project` (slug) on each tool call.
+
+```json
+{
+  "mcpServers": {
+    "visualq": {
+      "command": "npx",
+      "args": ["-y", "@visualq/mcp"],
+      "env": {
+        "VISUALQ_API_KEY": "vq_org_live_…",
+        "VISUALQ_BASE_URL": "https://visualq.ai",
+        "VISUALQ_TOOL_PROFILE": "vrt-qa"
+      }
+    }
+  }
+}
+```
+
+Optional: copy `examples/visualq-qa-agent.mdc` into `.cursor/rules/`.
+
+## Tool profiles
+
+Set `VISUALQ_TOOL_PROFILE`: `vrt-qa` (default), `frt-qa`, `tracking-qa`, or `full`.
+
+## Quick start (Cursor) — project CI key (legacy)
 
 Add to `.cursor/mcp.json` or global MCP settings:
 

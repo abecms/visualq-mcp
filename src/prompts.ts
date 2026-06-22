@@ -31,7 +31,7 @@ export function registerPrompts(server: McpServer) {
           type: 'text',
           text: [
             'Run a pre-merge VisualQ check.',
-            '1. run_vrt (use staging environment if the user mentioned it).',
+            '1. run_vrt (pass project slug; use staging environment if mentioned).',
             '2. wait_for_run until completed.',
             '3. get_run_failures — block merge if failed > 0.',
             '4. get_site_health for rolling quality context.',
@@ -76,6 +76,27 @@ export function registerPrompts(server: McpServer) {
             '3. tracking_list_event_attributes — review event-variable matrix.',
             '4. tracking_get_audit_report — check failures; match eventResults by frt.featureId + stepIndex.',
             '5. tracking_link_event_frt (confirm: true) for uncovered events, then run_tracking.',
+          ].join('\n'),
+        },
+      }],
+    }),
+  )
+
+  server.prompt(
+    'onboard-new-site',
+    'Create a project and bootstrap VRT scenarios',
+    async () => ({
+      messages: [{
+        role: 'user',
+        content: {
+          type: 'text',
+          text: [
+            'Onboard a new site in VisualQ using the org agent key.',
+            '1. create_project with name, baseUrl, confirm: true.',
+            '2. crawl_site with baseUrl (async — poll get_job_status).',
+            '3. generate_scenarios from discovered URLs.',
+            '4. run_baseline on the new project (pass project slug on every tool).',
+            '5. Summarize created scenarios and next steps.',
           ].join('\n'),
         },
       }],

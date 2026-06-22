@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "generatedAt": "2026-06-22T10:02:59.642Z",
+  "generatedAt": "2026-06-23T06:53:41.475Z",
   "tools": [
     {
       "name": "list_projects",
@@ -1751,6 +1751,81 @@
       "parameters": {
         "type": "object",
         "properties": {}
+      },
+      "async": false
+    },
+    {
+      "name": "create_project",
+      "description": "Create a new VisualQ project with a default Production environment. Org agent keys only.",
+      "source": "invoke",
+      "phase": 3,
+      "mutating": true,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Project display name"
+          },
+          "baseUrl": {
+            "type": "string",
+            "description": "Site base URL (https://…)"
+          },
+          "description": {
+            "type": "string"
+          },
+          "confirm": {
+            "type": "boolean",
+            "description": "Must be true for mutating tools"
+          }
+        },
+        "required": [
+          "name",
+          "baseUrl",
+          "confirm"
+        ]
+      },
+      "async": false
+    },
+    {
+      "name": "get_project",
+      "description": "Project metadata (baseUrl, modules, scenario count).",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          }
+        }
+      },
+      "async": false
+    },
+    {
+      "name": "list_environments",
+      "description": "List environments for a project.",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          }
+        }
       },
       "async": false
     },
