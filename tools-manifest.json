@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "generatedAt": "2026-06-16T21:53:37.839Z",
+  "generatedAt": "2026-06-22T10:02:59.642Z",
   "tools": [
     {
       "name": "list_projects",
@@ -149,7 +149,7 @@
     },
     {
       "name": "run_tracking",
-      "description": "Run analytics/tracking audit.",
+      "description": "Run analytics/tracking audit. Dispatches linked FRT features by featureId; audits each event on its linked stepIndex (network hits during that step only). Events need frtRefs with stepIndex — call tracking_get_plan first.",
       "source": "ci",
       "phase": 1,
       "mutating": true,
@@ -533,8 +533,29 @@
       "async": false
     },
     {
+      "name": "tracking_get_plan",
+      "description": "Tracking plan with event↔FRT links. Each event uses frtRefs: [{ featureId, stepIndex, stepText }] — one FRT feature = one scenario; stepIndex is required (0-based, no Background). Response includes eventFrtLinking hints and feature step counts. Legacy scenarioName refs are invalid.",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          }
+        }
+      },
+      "async": false
+    },
+    {
       "name": "tracking_get_audit_report",
-      "description": "Tracking audit bilan summary (global score, suite PASS/FAIL/WARN/SKIP table). Uses latest audit when auditId is omitted.",
+      "description": "Tracking audit bilan (global score, suite table). FRT-verified events include frt.featureId + frt.stepIndex on eventResults — match plan links by featureId, not scenario name. Per-step audit: hits captured during the linked step only.",
       "source": "invoke",
       "phase": 2,
       "mutating": false,
@@ -590,6 +611,880 @@
         }
       },
       "async": false
+    },
+    {
+      "name": "tracking_get_page",
+      "description": "Tracking plan page with datalayer attributes and linked VRT scenarios (pageIds).",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
+          "pageId": {
+            "type": "string",
+            "description": "Plan page id"
+          }
+        },
+        "required": [
+          "pageId"
+        ]
+      },
+      "async": false,
+      "required": [
+        "pageId"
+      ]
+    },
+    {
+      "name": "tracking_get_event",
+      "description": "Tracking plan event with event-variable attributes and linked FRT scenarios (frtRefs).",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
+          "eventId": {
+            "type": "string",
+            "description": "Analytics event id or column key (e.g. click.action::2)"
+          }
+        }
+      },
+      "async": false,
+      "required": [
+        "eventId"
+      ]
+    },
+    {
+      "name": "tracking_list_pages",
+      "description": "List tracking plan pages with scenario and attribute counts.",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          }
+        }
+      },
+      "async": false
+    },
+    {
+      "name": "tracking_list_events",
+      "description": "List tracking plan events with FRT link and attribute counts; flags uncovered events.",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          }
+        }
+      },
+      "async": false
+    },
+    {
+      "name": "tracking_list_page_attributes",
+      "description": "List datalayer variable definitions and per-page expected values. Filter by pageId to scope values.",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
+          "pageId": {
+            "type": "string"
+          }
+        }
+      },
+      "async": false
+    },
+    {
+      "name": "tracking_list_event_attributes",
+      "description": "List event-variable definitions and per-event expected values. Filter by eventId to scope values.",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
+          "eventId": {
+            "type": "string"
+          }
+        }
+      },
+      "async": false
+    },
+    {
+      "name": "tracking_set_page_attribute",
+      "description": "Set or update a datalayer attribute expected value on a plan page. Requires confirm: true.",
+      "source": "invoke",
+      "phase": 3,
+      "mutating": true,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
+          "pageId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "description": "Attribute name"
+          },
+          "expected": {
+            "type": "object",
+            "description": "Expected value for audit checks",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "static",
+                  "dynamic",
+                  "enum",
+                  "conditional",
+                  "not_empty",
+                  "numeric",
+                  "text",
+                  "any",
+                  "not_set"
+                ]
+              },
+              "value": {
+                "type": "string"
+              },
+              "enumValues": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "allowEmpty": {
+                "type": "boolean"
+              },
+              "example": {
+                "type": "string"
+              },
+              "condition": {
+                "type": "object"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "description": "Variable type (default string)"
+          },
+          "mandatory": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string"
+          },
+          "trackingMapping": {
+            "type": "string"
+          },
+          "trackingDimension": {
+            "type": "string"
+          },
+          "confirm": {
+            "type": "boolean",
+            "description": "Must be true for mutating tools"
+          }
+        },
+        "required": [
+          "pageId",
+          "name",
+          "expected",
+          "confirm"
+        ]
+      },
+      "async": false,
+      "required": [
+        "pageId",
+        "name",
+        "expected",
+        "confirm"
+      ]
+    },
+    {
+      "name": "tracking_delete_page_attribute",
+      "description": "Remove a datalayer attribute value from a plan page (drops row if unused). Requires confirm: true.",
+      "source": "invoke",
+      "phase": 3,
+      "mutating": true,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
+          "pageId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "confirm": {
+            "type": "boolean",
+            "description": "Must be true for mutating tools"
+          }
+        },
+        "required": [
+          "pageId",
+          "name",
+          "confirm"
+        ]
+      },
+      "async": false,
+      "required": [
+        "pageId",
+        "name",
+        "confirm"
+      ]
+    },
+    {
+      "name": "tracking_set_event_attribute",
+      "description": "Set or update an event-variable expected value on a plan event. Requires confirm: true.",
+      "source": "invoke",
+      "phase": 3,
+      "mutating": true,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
+          "eventId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "expected": {
+            "type": "object",
+            "description": "Expected value for audit checks",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "static",
+                  "dynamic",
+                  "enum",
+                  "conditional",
+                  "not_empty",
+                  "numeric",
+                  "text",
+                  "any",
+                  "not_set"
+                ]
+              },
+              "value": {
+                "type": "string"
+              },
+              "enumValues": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "allowEmpty": {
+                "type": "boolean"
+              },
+              "example": {
+                "type": "string"
+              },
+              "condition": {
+                "type": "object"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "description": "Variable type (default string)"
+          },
+          "mandatory": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string"
+          },
+          "trackingMapping": {
+            "type": "string"
+          },
+          "trackingDimension": {
+            "type": "string"
+          },
+          "confirm": {
+            "type": "boolean",
+            "description": "Must be true for mutating tools"
+          }
+        },
+        "required": [
+          "eventId",
+          "name",
+          "expected",
+          "confirm"
+        ]
+      },
+      "async": false,
+      "required": [
+        "eventId",
+        "name",
+        "expected",
+        "confirm"
+      ]
+    },
+    {
+      "name": "tracking_delete_event_attribute",
+      "description": "Remove an event-variable value from a plan event. Requires confirm: true.",
+      "source": "invoke",
+      "phase": 3,
+      "mutating": true,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
+          "eventId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "confirm": {
+            "type": "boolean",
+            "description": "Must be true for mutating tools"
+          }
+        },
+        "required": [
+          "eventId",
+          "name",
+          "confirm"
+        ]
+      },
+      "async": false,
+      "required": [
+        "eventId",
+        "name",
+        "confirm"
+      ]
+    },
+    {
+      "name": "tracking_upsert_page",
+      "description": "Create or update a tracking plan page row. Requires confirm: true.",
+      "source": "invoke",
+      "phase": 3,
+      "mutating": true,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
+          "id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "pageType": {
+            "type": "string"
+          },
+          "pageIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "confirm": {
+            "type": "boolean",
+            "description": "Must be true for mutating tools"
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "pageType",
+          "confirm"
+        ]
+      },
+      "async": false,
+      "required": [
+        "id",
+        "label",
+        "pageType",
+        "confirm"
+      ]
+    },
+    {
+      "name": "tracking_delete_page",
+      "description": "Delete a tracking plan page and clean related variable values. Requires confirm: true.",
+      "source": "invoke",
+      "phase": 3,
+      "mutating": true,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
+          "pageId": {
+            "type": "string"
+          },
+          "confirm": {
+            "type": "boolean",
+            "description": "Must be true for mutating tools"
+          }
+        },
+        "required": [
+          "pageId",
+          "confirm"
+        ]
+      },
+      "async": false,
+      "required": [
+        "pageId",
+        "confirm"
+      ]
+    },
+    {
+      "name": "tracking_upsert_event",
+      "description": "Create or update a tracking plan event row. Requires confirm: true.",
+      "source": "invoke",
+      "phase": 3,
+      "mutating": true,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
+          "id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "pages": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "confirm": {
+            "type": "boolean",
+            "description": "Must be true for mutating tools"
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "eventType",
+          "confirm"
+        ]
+      },
+      "async": false,
+      "required": [
+        "id",
+        "label",
+        "eventType",
+        "confirm"
+      ]
+    },
+    {
+      "name": "tracking_delete_event",
+      "description": "Delete a tracking plan event and clean related event-variable values. Requires confirm: true.",
+      "source": "invoke",
+      "phase": 3,
+      "mutating": true,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
+          "eventId": {
+            "type": "string"
+          },
+          "confirm": {
+            "type": "boolean",
+            "description": "Must be true for mutating tools"
+          }
+        },
+        "required": [
+          "eventId",
+          "confirm"
+        ]
+      },
+      "async": false,
+      "required": [
+        "eventId",
+        "confirm"
+      ]
+    },
+    {
+      "name": "tracking_link_page_scenario",
+      "description": "Link a plan page to a VRT scenario id (pageIds). Requires confirm: true.",
+      "source": "invoke",
+      "phase": 3,
+      "mutating": true,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
+          "pageId": {
+            "type": "string"
+          },
+          "scenarioId": {
+            "type": "string",
+            "description": "VRT scenario Firestore id"
+          },
+          "confirm": {
+            "type": "boolean",
+            "description": "Must be true for mutating tools"
+          }
+        },
+        "required": [
+          "pageId",
+          "scenarioId",
+          "confirm"
+        ]
+      },
+      "async": false,
+      "required": [
+        "pageId",
+        "scenarioId",
+        "confirm"
+      ]
+    },
+    {
+      "name": "tracking_unlink_page_scenario",
+      "description": "Unlink a VRT scenario from a plan page. Requires confirm: true.",
+      "source": "invoke",
+      "phase": 3,
+      "mutating": true,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
+          "pageId": {
+            "type": "string"
+          },
+          "scenarioId": {
+            "type": "string"
+          },
+          "confirm": {
+            "type": "boolean",
+            "description": "Must be true for mutating tools"
+          }
+        },
+        "required": [
+          "pageId",
+          "scenarioId",
+          "confirm"
+        ]
+      },
+      "async": false,
+      "required": [
+        "pageId",
+        "scenarioId",
+        "confirm"
+      ]
+    },
+    {
+      "name": "tracking_link_event_frt",
+      "description": "Link a plan event to an FRT feature step ({ featureId, stepIndex, stepText }). Requires confirm: true.",
+      "source": "invoke",
+      "phase": 3,
+      "mutating": true,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
+          "eventId": {
+            "type": "string"
+          },
+          "featureId": {
+            "type": "string"
+          },
+          "stepIndex": {
+            "type": "number",
+            "description": "0-based step index (Background excluded)"
+          },
+          "stepText": {
+            "type": "string"
+          },
+          "confirm": {
+            "type": "boolean",
+            "description": "Must be true for mutating tools"
+          }
+        },
+        "required": [
+          "eventId",
+          "featureId",
+          "stepIndex",
+          "stepText",
+          "confirm"
+        ]
+      },
+      "async": false,
+      "required": [
+        "eventId",
+        "featureId",
+        "stepIndex",
+        "stepText",
+        "confirm"
+      ]
+    },
+    {
+      "name": "tracking_unlink_event_frt",
+      "description": "Remove an FRT feature link from a plan event. Requires confirm: true.",
+      "source": "invoke",
+      "phase": 3,
+      "mutating": true,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
+          "eventId": {
+            "type": "string"
+          },
+          "featureId": {
+            "type": "string"
+          },
+          "confirm": {
+            "type": "boolean",
+            "description": "Must be true for mutating tools"
+          }
+        },
+        "required": [
+          "eventId",
+          "featureId",
+          "confirm"
+        ]
+      },
+      "async": false,
+      "required": [
+        "eventId",
+        "featureId",
+        "confirm"
+      ]
+    },
+    {
+      "name": "tracking_update_plan",
+      "description": "Replace one or more tracking plan sections (pages, events, variables, …). Requires confirm: true and reason.",
+      "source": "invoke",
+      "phase": 3,
+      "mutating": true,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
+          "fields": {
+            "type": "object",
+            "description": "Partial plan sections to replace",
+            "properties": {
+              "conventions": {
+                "type": "object"
+              },
+              "pageTypes": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "eventTypes": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "pages": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "datalayerVariables": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "eventVariables": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "events": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "metadata": {
+                "type": "object"
+              },
+              "tmsConfig": {
+                "type": "object"
+              }
+            }
+          },
+          "reason": {
+            "type": "string",
+            "description": "Why this bulk update is applied"
+          },
+          "confirm": {
+            "type": "boolean",
+            "description": "Must be true for mutating tools"
+          }
+        },
+        "required": [
+          "fields",
+          "reason",
+          "confirm"
+        ]
+      },
+      "async": false,
+      "required": [
+        "fields",
+        "reason",
+        "confirm"
+      ]
     },
     {
       "name": "create_content_rule",
@@ -1208,6 +2103,27 @@
       "async": false
     },
     {
+      "name": "frt_get_feature_groups",
+      "description": "FRT feature folder organization snapshot (groups and ungrouped feature names).",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          }
+        }
+      },
+      "async": false
+    },
+    {
       "name": "perf_get_latest_report",
       "description": "Latest performance audit report.",
       "source": "invoke",
@@ -1357,27 +2273,6 @@
     {
       "name": "security_list_history",
       "description": "Security run history.",
-      "source": "invoke",
-      "phase": 2,
-      "mutating": false,
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "project": {
-            "type": "string",
-            "description": "Project slug or id (optional with API key)"
-          },
-          "environment": {
-            "type": "string",
-            "description": "Environment slug or id"
-          }
-        }
-      },
-      "async": false
-    },
-    {
-      "name": "tracking_get_plan",
-      "description": "Tracking plan.",
       "source": "invoke",
       "phase": 2,
       "mutating": false,
@@ -1562,7 +2457,7 @@
     },
     {
       "name": "run_frt_feature",
-      "description": "Run an FRT feature test suite.",
+      "description": "Run an FRT feature (one feature = one Gherkin scenario). For tracking event verification use featureId only — omit scenarioFilter. scenarioFilter is only for legacy multi-scenario .feature files.",
       "source": "invoke",
       "phase": 3,
       "mutating": true,
@@ -1578,13 +2473,15 @@
             "description": "Environment slug or id"
           },
           "featureId": {
-            "type": "string"
+            "type": "string",
+            "description": "FRT feature Firestore id"
           },
           "scenarioFilter": {
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "description": "Optional — rarely needed; one VisualQ feature already equals one scenario"
           },
           "browsers": {
             "type": "array",
@@ -1924,6 +2821,63 @@
         "featureId",
         "confirm"
       ]
+    },
+    {
+      "name": "frt_organize_feature_groups",
+      "description": "Organize FRT features into folders on the FRT scenarios page. Use exact feature names from frt_get_feature_groups.",
+      "source": "invoke",
+      "phase": 3,
+      "mutating": true,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
+          "groups": {
+            "type": "array",
+            "description": "Folders to create/update, in display order.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Folder display name"
+                },
+                "featureNames": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "Exact FRT feature names to place in this folder"
+                }
+              },
+              "required": [
+                "name",
+                "featureNames"
+              ]
+            }
+          },
+          "replaceExistingGroups": {
+            "type": "boolean",
+            "description": "When true (default), only listed folders are kept."
+          },
+          "confirm": {
+            "type": "boolean",
+            "description": "Must be true for mutating tools"
+          }
+        },
+        "required": [
+          "groups",
+          "confirm"
+        ]
+      },
+      "async": false
     },
     {
       "name": "frt_propose_journey",

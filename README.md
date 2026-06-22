@@ -29,6 +29,19 @@ Create an API key in VisualQ: **Project → Settings → API keys** (prefix `vq_
 
 **Phase 2:** `get_run_history`, `get_scenario_details`, `compare_runs`, `check_setup_health`, `explain_vrt_failure`, `perf_get_latest_report`, `seo_get_report`, `a11y_get_report`, `tracking_get_plan`, `tracking_get_audit_report`, `tracking_export_audit_report`
 
+### Tracking event ↔ FRT links
+
+Each analytics event in the tracking plan links to an **FRT feature + Gherkin step**:
+
+```json
+{ "featureId": "…", "stepIndex": 0, "stepText": "When user clicks play" }
+```
+
+- **One FRT feature = one scenario** — use `featureId` only (no `scenarioName` in refs).
+- **`stepIndex`** is mandatory (0-based, Background excluded).
+- **`run_tracking`** audits network hits captured **during that step only**.
+- Call **`tracking_get_plan`** first — response includes `eventFrtLinking` hints, `uncoveredEventIds`, and per-feature step counts.
+
 **Phase 3 (write — `confirm: true` required):** `approve_vrt_results`, `create_scenario`, `create_comparison_rule`, `run_frt_feature`, `post_pr_comment`
 
 ## API key scopes

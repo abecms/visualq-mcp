@@ -60,4 +60,25 @@ export function registerPrompts(server: McpServer) {
       }],
     }),
   )
+
+  server.prompt(
+    'diagnose-tracking-audit',
+    'Review tracking plan links and latest audit gaps',
+    async () => ({
+      messages: [{
+        role: 'user',
+        content: {
+          type: 'text',
+          text: [
+            'Review VisualQ tracking coverage for this project.',
+            '1. tracking_list_events — find uncovered events.',
+            '2. tracking_get_event — inspect attributes and FRT links for one event.',
+            '3. tracking_list_event_attributes — review event-variable matrix.',
+            '4. tracking_get_audit_report — check failures; match eventResults by frt.featureId + stepIndex.',
+            '5. tracking_link_event_frt (confirm: true) for uncovered events, then run_tracking.',
+          ].join('\n'),
+        },
+      }],
+    }),
+  )
 }
