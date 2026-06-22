@@ -1,5 +1,4 @@
 import manifest from '../tools-manifest.json' with { type: 'json' }
-import { toolsForProfile } from './profiles.js'
 
 export interface ManifestTool {
   name: string
@@ -19,7 +18,7 @@ export interface ToolsManifest {
 
 export const TOOLS_MANIFEST = manifest as ToolsManifest
 
+/** Full VisualQ tool catalog — same surface as the backend MCP manifest. */
 export function manifestTools(): ManifestTool[] {
-  const profile = process.env.VISUALQ_TOOL_PROFILE
-  return toolsForProfile(profile, TOOLS_MANIFEST.tools)
+  return TOOLS_MANIFEST.tools
 }

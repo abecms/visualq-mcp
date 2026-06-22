@@ -14,19 +14,14 @@ Use a **org-scoped** key (`vq_org_live_…`) from VisualQ **Settings → Agent A
       "args": ["-y", "@visualq/mcp"],
       "env": {
         "VISUALQ_API_KEY": "vq_org_live_…",
-        "VISUALQ_BASE_URL": "https://visualq.ai",
-        "VISUALQ_TOOL_PROFILE": "vrt-qa"
+        "VISUALQ_BASE_URL": "https://visualq.ai"
       }
     }
   }
 }
 ```
 
-Optional: copy `examples/visualq-qa-agent.mdc` into `.cursor/rules/`.
-
-## Tool profiles
-
-Set `VISUALQ_TOOL_PROFILE`: `vrt-qa` (default), `frt-qa`, `tracking-qa`, or `full`.
+The server exposes the full VisualQ MCP tool catalog from `tools-manifest.json` (invoke + CI tools). Wire it to your own QA agent — no bundled agent persona required.
 
 ## Quick start (Cursor) — project CI key (legacy)
 
