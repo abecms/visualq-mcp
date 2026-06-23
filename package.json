@@ -1,6 +1,6 @@
 {
   "name": "@visualq/mcp",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "MCP server for VisualQ — run VRT, read failures, and diagnose from your IDE",
   "type": "module",
   "bin": {
@@ -15,7 +15,8 @@
     "build": "tsc",
     "type-check": "tsc --noEmit",
     "test": "vitest run",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "sync-manifest": "node -e \"const m=require('./tools-manifest.json'); if(!m.tools?.length) { console.error('tools-manifest.json missing or empty'); process.exit(1) } console.log('Manifest OK:', m.tools.length, 'tools')\""
   },
   "keywords": [
     "mcp",

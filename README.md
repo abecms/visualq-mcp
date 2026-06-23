@@ -1,10 +1,15 @@
 # @visualq/mcp
 
-MCP server for [VisualQ](https://visualq.ai) — run VRT, poll results, and read structured failure reports from Cursor, Claude Desktop, or any MCP client.
+MCP server for [VisualQ](https://visualq.ai) — full QA tool catalog (VRT, FRT, pillars, tracking) for Cursor, Claude Desktop, or any MCP client.
 
-## Org agent key (recommended for Cursor)
+## Production setup (recommended)
 
-Use a **org-scoped** key (`vq_org_live_…`) from VisualQ **Settings → Agent API Keys**. One MCP config covers all projects — pass `project` (slug) on each tool call.
+1. Sign in to **https://visualq.ai**
+2. Go to **Settings → Agent API Keys** (org admin)
+3. Create a key with scope **`mcp_full`**
+4. Optionally set a **default project** slug if you mostly work on one client
+5. Copy the **Cursor MCP config** snippet
+6. Paste into `~/.cursor/mcp.json` (or project `.cursor/mcp.json`) and restart Cursor
 
 ```json
 {
@@ -21,11 +26,53 @@ Use a **org-scoped** key (`vq_org_live_…`) from VisualQ **Settings → Agent A
 }
 ```
 
-The server exposes the full VisualQ MCP tool catalog from `tools-manifest.json` (invoke + CI tools). Wire it to your own QA agent — no bundled agent persona required.
+### Single-project shortcut
 
-## Quick start (Cursor) — project CI key (legacy)
+If your org key has a default project (or you set it only in MCP env):
 
-Add to `.cursor/mcp.json` or global MCP settings:
+```json
+"VISUALQ_DEFAULT_PROJECT": "afp-com"
+```
+
+Then tools can omit `project` when the key has `defaultProject` on the server **or** this env var is set in the MCP config.
+
+### Multi-project orgs
+
+Pass `project` on every tool call (slug or id), e.g. `"project": "afp-com"`.
+
+## Environment variables
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `VISUALQ_API_KEY` | yes | — | Org agent key `vq_org_live_…` or legacy project key `vq_live_…` |
+| `VISUALQ_BASE_URL` | no | `https://visualq.ai` | VisualQ instance (use your origin for self-hosted) |
+| `VISUALQ_DEFAULT_PROJECT` | no | — | Default project slug injected into tool args |
+| `VISUALQ_MCP_HTTP` | no | — | Set `1` to run local Streamable HTTP on `127.0.0.1:3847` |
+| `VISUALQ_MCP_PORT` | no | `3847` | HTTP mode port |
+
+## API key scopes
+
+| Scope | MCP read | MCP write (`confirm: true`) | CI `/api/ci/*` |
+|-------|----------|-----------------------------|----------------|
+| `mcp_read` | yes | no | no |
+| `mcp_full` | yes | yes | no |
+| `ci` (project key) | no | no | yes |
+
+Org agent keys support **`mcp_read`** and **`mcp_full`** only.
+
+## Typical agent workflows
+
+**Onboard a site:** `create_project` → `crawl_site` → `create_scenario` → `run_baseline` → `frt_save_feature_draft` → `frt_compile_feature` → `run_frt_feature`
+
+**Pre-merge VRT:** `list_scenarios` → `run_vrt` → `get_run_failures` → `explain_vrt_failure`
+
+**Jira-driven QA:** read ticket → `create_scenario` / `frt_save_feature_draft` with ticket id in name/description → run tests
+
+Mutating tools require **`confirm: true`** in arguments.
+
+## Legacy project CI key
+
+For GitHub Actions / Jenkins, use a **project-scoped** key (`vq_live_…`) with scope `ci` — not the org agent key.
 
 ```json
 {
@@ -42,60 +89,41 @@ Add to `.cursor/mcp.json` or global MCP settings:
 }
 ```
 
-Create an API key in VisualQ: **Project → Settings → API keys** (prefix `vq_live_`).
+Create in **Project → Settings → API keys**.
 
-## Tools
+## Hosted REST gateway (advanced)
 
-**Phase 1:** `list_projects`, `list_scenarios`, `run_vrt`, `run_baseline`, `get_run_status`, `wait_for_run`, `get_run_failures`, `get_diff_stats`, `get_quality_score`
+VisualQ also exposes JSON invoke (not stdio MCP wire protocol):
 
-**Phase 2:** `get_run_history`, `get_scenario_details`, `compare_runs`, `check_setup_health`, `explain_vrt_failure`, `perf_get_latest_report`, `seo_get_report`, `a11y_get_report`, `tracking_get_plan`, `tracking_get_audit_report`, `tracking_export_audit_report`
+- `GET https://visualq.ai/api/mcp` — tool catalog (public)
+- `POST https://visualq.ai/api/mcp/v1/invoke` — `X-API-Key` + `{ "tool", "args" }`
 
-### Tracking event ↔ FRT links
+The `@visualq/mcp` npm package is the supported IDE integration path.
 
-Each analytics event in the tracking plan links to an **FRT feature + Gherkin step**:
-
-```json
-{ "featureId": "…", "stepIndex": 0, "stepText": "When user clicks play" }
-```
-
-- **One FRT feature = one scenario** — use `featureId` only (no `scenarioName` in refs).
-- **`stepIndex`** is mandatory (0-based, Background excluded).
-- **`run_tracking`** audits network hits captured **during that step only**.
-- Call **`tracking_get_plan`** first — response includes `eventFrtLinking` hints, `uncoveredEventIds`, and per-feature step counts.
-
-**Phase 3 (write — `confirm: true` required):** `approve_vrt_results`, `create_scenario`, `create_comparison_rule`, `run_frt_feature`, `post_pr_comment`
-
-## API key scopes
-
-| Scope | MCP read | MCP write | CI runs |
-|-------|----------|-----------|---------|
-| `ci` | no | no | yes |
-| `mcp_read` | yes | no | no |
-| `mcp_full` | yes | yes | yes |
-
-Existing keys without a scope default to `mcp_full`. Create scoped keys in **Project → Settings → API Keys** (optional `scope` field in API).
-
-## Streamable HTTP (optional)
-
-```bash
-VISUALQ_API_KEY=vq_live_… npx -y @visualq/mcp --http
-# → http://127.0.0.1:3847/mcp
-```
-
-## Development
+## Local development
 
 ```bash
 npm install
 npm run build
-VISUALQ_API_KEY=vq_live_… node dist/index.js
+VISUALQ_API_KEY=vq_org_live_… VISUALQ_BASE_URL=http://localhost:3000 node dist/index.js
 ```
 
-Sync tool manifest from the `visualq` backend repo:
+Sync tool manifest from the `visualq` backend (sibling repo):
 
 ```bash
 cd ../visualq && npm run mcp:export-manifest
+cd ../visualq-mcp && npm run sync-manifest
+```
+
+Before publishing to npm:
+
+```bash
+cd ../visualq && npm run mcp:export-manifest
+cd ../visualq-mcp && npm test && npm run build && npm run sync-manifest
+npm publish --access public
 ```
 
 ## Repository
 
-Published from `abecms/visualq-mcp`. Backend routes live in `abecms/visualq` (`/api/mcp/v1/invoke`).
+- Package: [abecms/visualq-mcp](https://github.com/abecms/visualq-mcp)
+- Backend: [abecms/visualq](https://github.com/abecms/visualq) (`/api/mcp/v1/invoke`)

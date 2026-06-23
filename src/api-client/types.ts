@@ -1,6 +1,8 @@
 export interface VisualQClientConfig {
   apiKey: string
   baseUrl: string
+  /** Injected as `project` when a tool call omits it (optional MCP env). */
+  defaultProject?: string
 }
 
 export interface CIRunResponse {

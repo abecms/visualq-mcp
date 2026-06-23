@@ -36,14 +36,15 @@ export function registerTools(server: McpServer, client: VisualQClient, tools: M
 
     server.tool(tool.name, tool.description, schema.shape as z.ZodRawShape, async (args: Record<string, unknown>) => {
       try {
+        const resolvedArgs = client.applyToolDefaults(args)
         switch (tool.source) {
           case 'ci':
-            return await handleCiTool(client, tool.name, args)
+            return await handleCiTool(client, tool.name, resolvedArgs)
           case 'client':
-            return await handleClientTool(client, tool.name, args)
+            return await handleClientTool(client, tool.name, resolvedArgs)
           case 'invoke': {
             const cleanArgs = Object.fromEntries(
-              Object.entries(args).filter(([, v]) => v !== undefined),
+              Object.entries(resolvedArgs).filter(([, v]) => v !== undefined),
             )
             const result = await client.invokeTool(tool.name, cleanArgs)
             return jsonText(result)

@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { createClientFromEnv, VisualQClient } from './api-client/index.js'
@@ -6,10 +9,14 @@ import { registerPrompts } from './prompts.js'
 import { registerResources } from './resources.js'
 import { registerTools } from './tools.js'
 
+const PACKAGE_VERSION = JSON.parse(
+  readFileSync(join(dirname(fileURLToPath(import.meta.url)), '../package.json'), 'utf8'),
+) as { version: string }
+
 export function createMcpServer(client: VisualQClient): McpServer {
   const server = new McpServer({
     name: 'visualq',
-    version: '0.2.0',
+    version: PACKAGE_VERSION.version,
   })
 
   registerTools(server, client, manifestTools())

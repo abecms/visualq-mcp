@@ -6,6 +6,16 @@ describe('VisualQClient', () => {
     vi.restoreAllMocks()
   })
 
+  it('applyToolDefaults injects default project when omitted', () => {
+    const client = new VisualQClient({
+      apiKey: 'vq_org_live_test',
+      baseUrl: 'https://visualq.ai',
+      defaultProject: 'acme',
+    })
+    expect(client.applyToolDefaults({})).toEqual({ project: 'acme' })
+    expect(client.applyToolDefaults({ project: 'other' })).toEqual({ project: 'other' })
+  })
+
   it('invokeTool posts to /api/mcp/v1/invoke', async () => {
     const fetchMock = vi.fn(async () => new Response(JSON.stringify({
       ok: true,

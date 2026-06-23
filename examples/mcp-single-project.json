@@ -5,7 +5,8 @@
       "args": ["-y", "@visualq/mcp"],
       "env": {
         "VISUALQ_API_KEY": "vq_org_live_YOUR_KEY_HERE",
-        "VISUALQ_BASE_URL": "https://visualq.ai"
+        "VISUALQ_BASE_URL": "https://visualq.ai",
+        "VISUALQ_DEFAULT_PROJECT": "your-project-slug"
       }
     }
   }

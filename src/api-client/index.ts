@@ -33,6 +33,13 @@ export class VisualQClient {
     return `${this.config.baseUrl.replace(/\/$/, '')}${path}`
   }
 
+  applyToolDefaults(args: Record<string, unknown>): Record<string, unknown> {
+    if (this.config.defaultProject && args.project === undefined) {
+      return { ...args, project: this.config.defaultProject }
+    }
+    return args
+  }
+
   async listProjects(): Promise<ProjectSummary[]> {
     const res = await fetch(this.url('/api/ci/projects'), { headers: this.headers() })
     if (!res.ok) throw new VisualQApiError(await res.text(), res.status)
@@ -90,10 +97,11 @@ export class VisualQClient {
 export function createClientFromEnv(): VisualQClient {
   const apiKey = process.env.VISUALQ_API_KEY
   const baseUrl = process.env.VISUALQ_BASE_URL || 'https://visualq.ai'
+  const defaultProject = process.env.VISUALQ_DEFAULT_PROJECT?.trim() || undefined
   if (!apiKey) {
     throw new Error('VISUALQ_API_KEY is required')
   }
-  return new VisualQClient({ apiKey, baseUrl })
+  return new VisualQClient({ apiKey, baseUrl, defaultProject })
 }
 
 function sleep(ms: number) {

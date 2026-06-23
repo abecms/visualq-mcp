@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "generatedAt": "2026-06-23T06:53:41.475Z",
+  "generatedAt": "2026-06-23T09:49:58.762Z",
   "tools": [
     {
       "name": "list_projects",
@@ -2872,30 +2872,52 @@
     },
     {
       "name": "frt_save_feature_draft",
-      "description": "Persist FRT feature draft (scenarios, steps, meta).",
+      "description": "Create or update an FRT feature from Gherkin. Omit featureId to create a new feature.",
       "source": "invoke",
       "phase": 3,
       "mutating": true,
       "parameters": {
         "type": "object",
         "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
           "featureId": {
+            "type": "string",
+            "description": "Existing feature id (omit to create)"
+          },
+          "name": {
+            "type": "string",
+            "description": "Feature display name"
+          },
+          "gherkin": {
+            "type": "string",
+            "description": "Full .feature Gherkin source"
+          },
+          "description": {
             "type": "string"
           },
-          "draft": {
-            "type": "object"
+          "baseUrl": {
+            "type": "string",
+            "description": "Start URL for the feature"
           },
           "confirm": {
             "type": "boolean",
             "description": "Must be true for mutating tools"
           }
-        }
+        },
+        "required": [
+          "name",
+          "gherkin",
+          "confirm"
+        ]
       },
-      "async": false,
-      "required": [
-        "featureId",
-        "confirm"
-      ]
+      "async": false
     },
     {
       "name": "frt_organize_feature_groups",
@@ -2963,6 +2985,14 @@
       "parameters": {
         "type": "object",
         "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
           "goal": {
             "type": "string"
           },
@@ -2985,6 +3015,14 @@
       "parameters": {
         "type": "object",
         "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
           "baseUrl": {
             "type": "string"
           },
