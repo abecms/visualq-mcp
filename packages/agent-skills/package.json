@@ -1,0 +1,30 @@
+{
+  "name": "@visualq/agent-skills",
+  "version": "1.0.0",
+  "description": "Official VisualQ agent skills and rules for Cursor and Claude Code",
+  "type": "module",
+  "files": [
+    "skills",
+    "rules",
+    "README.md"
+  ],
+  "scripts": {
+    "skills:sync": "node scripts/sync-skills.mjs"
+  },
+  "keywords": [
+    "visualq",
+    "cursor",
+    "skills",
+    "qa",
+    "mcp"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abecms/visualq-mcp.git",
+    "directory": "packages/agent-skills"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

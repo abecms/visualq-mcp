@@ -1,0 +1,46 @@
+{
+  "name": "@visualq/setup-agent",
+  "version": "1.0.0",
+  "description": "Install VisualQ MCP config, skills, and rules for Cursor or Claude Code",
+  "type": "module",
+  "bin": {
+    "visualq-setup-agent": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "assets"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "type-check": "tsc --noEmit",
+    "test": "vitest run",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@visualq/agent-skills": "^1.0.0"
+  },
+  "keywords": [
+    "visualq",
+    "cursor",
+    "claude",
+    "mcp",
+    "setup"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abecms/visualq-mcp.git",
+    "directory": "packages/setup-agent"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "typescript": "~5.8.0",
+    "vitest": "^3.1.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

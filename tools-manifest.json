@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "generatedAt": "2026-06-23T09:49:58.762Z",
+  "generatedAt": "2026-06-27T19:48:26.995Z",
   "tools": [
     {
       "name": "list_projects",
@@ -217,6 +217,49 @@
             "items": {
               "type": "string"
             }
+          }
+        }
+      },
+      "async": false
+    },
+    {
+      "name": "run_frt",
+      "description": "Run FRT functional test batch (all features or featureIds subset).",
+      "source": "ci",
+      "phase": 1,
+      "mutating": true,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string"
+          },
+          "environment": {
+            "type": "string"
+          },
+          "featureIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "commitSha": {
+            "type": "string"
+          },
+          "branch": {
+            "type": "string"
+          },
+          "prNumber": {
+            "type": "number"
+          },
+          "prUrl": {
+            "type": "string"
+          },
+          "ciProvider": {
+            "type": "string"
+          },
+          "jiraKey": {
+            "type": "string"
           }
         }
       },
@@ -2442,6 +2485,73 @@
           "environment": {
             "type": "string",
             "description": "Environment slug or id"
+          }
+        }
+      },
+      "async": false
+    },
+    {
+      "name": "gate_pr_quality",
+      "description": "Structured PR merge verdict aggregating VRT failures, latest FRT batch, and rolling health blockers.",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
+          "threshold": {
+            "type": "string",
+            "enum": [
+              "balanced",
+              "strict"
+            ],
+            "description": "Release strictness (default balanced)"
+          },
+          "includeVrt": {
+            "type": "boolean",
+            "description": "Include latest VRT failures (default true)"
+          },
+          "includeFrt": {
+            "type": "boolean",
+            "description": "Include latest FRT batch (default true)"
+          },
+          "includeHealth": {
+            "type": "boolean",
+            "description": "Include rolling health blockers (default true)"
+          }
+        }
+      },
+      "async": false
+    },
+    {
+      "name": "get_org_audit_logs",
+      "description": "Org governance audit trail (Business+). Includes org events and MCP mutation log.",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "number",
+            "description": "Max entries (default 50, max 100)"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "org",
+              "mcp",
+              "all"
+            ],
+            "description": "Log source filter"
           }
         }
       },

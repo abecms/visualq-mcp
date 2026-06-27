@@ -21,7 +21,7 @@ export function registerResources(server: McpServer, client: VisualQClient) {
   server.resource(
     'quality-score',
     'visualq://quality-score',
-    { description: 'Composite quality score for the API-key project' },
+    { description: 'Composite quality score from rolling page health' },
     async () => {
       const result = await client.invokeTool('get_quality_score', {})
       return {
@@ -59,6 +59,54 @@ export function registerResources(server: McpServer, client: VisualQClient) {
       return {
         contents: [{
           uri: 'visualq://scenarios',
+          mimeType: 'application/json',
+          text: JSON.stringify(result, null, 2),
+        }],
+      }
+    },
+  )
+
+  server.resource(
+    'frt-step-library',
+    'visualq://frt-step-library',
+    { description: 'Project FRT step definition library (search with empty query returns sample)' },
+    async () => {
+      const result = await client.invokeTool('frt_search_step_library', { query: '' })
+      return {
+        contents: [{
+          uri: 'visualq://frt-step-library',
+          mimeType: 'application/json',
+          text: JSON.stringify(result, null, 2),
+        }],
+      }
+    },
+  )
+
+  server.resource(
+    'frt-feature-groups',
+    'visualq://frt-feature-groups',
+    { description: 'FRT feature folders and ungrouped features' },
+    async () => {
+      const result = await client.invokeTool('frt_get_feature_groups', {})
+      return {
+        contents: [{
+          uri: 'visualq://frt-feature-groups',
+          mimeType: 'application/json',
+          text: JSON.stringify(result, null, 2),
+        }],
+      }
+    },
+  )
+
+  server.resource(
+    'pr-quality-gate',
+    'visualq://pr-quality-gate',
+    { description: 'Structured PR merge verdict (VRT + FRT + rolling health)' },
+    async () => {
+      const result = await client.invokeTool('gate_pr_quality', { threshold: 'balanced' })
+      return {
+        contents: [{
+          uri: 'visualq://pr-quality-gate',
           mimeType: 'application/json',
           text: JSON.stringify(result, null, 2),
         }],

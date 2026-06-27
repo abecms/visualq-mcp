@@ -84,7 +84,7 @@ export function registerPrompts(server: McpServer) {
 
   server.prompt(
     'onboard-new-site',
-    'Create a project and bootstrap VRT scenarios',
+    'Create a project and bootstrap VRT + FRT coverage',
     async () => ({
       messages: [{
         role: 'user',
@@ -96,7 +96,76 @@ export function registerPrompts(server: McpServer) {
             '2. crawl_site with baseUrl (async — poll get_job_status).',
             '3. generate_scenarios from discovered URLs.',
             '4. run_baseline on the new project (pass project slug on every tool).',
-            '5. Summarize created scenarios and next steps.',
+            '5. frt_propose_journey for checkout/login or primary flow (async — poll get_job_status).',
+            '6. frt_save_feature_draft with confirm: true if journey looks good.',
+            '7. check_setup_health — summarize blockers and next actions.',
+          ].join('\n'),
+        },
+      }],
+    }),
+  )
+
+  server.prompt(
+    'pr-quality-gate',
+    'Aggregate VRT, FRT, and rolling health into a merge verdict',
+    async () => ({
+      messages: [{
+        role: 'user',
+        content: {
+          type: 'text',
+          text: [
+            'Run a PR quality gate for this VisualQ project.',
+            '1. gate_pr_quality with threshold balanced (or strict for release branches).',
+            '2. If blockMerge is true, list each blocker with pillar and suggested tool.',
+            '3. For VRT failures: get_run_failures → explain_vrt_failure on worst scenario.',
+            '4. For FRT failures: frt_explain_failure on failed run/step.',
+            '5. Summarize: merge allowed yes/no, rolling health coverage, recommended fixes.',
+            'Never treat a single latest run as the site score — use rolling health from gate_pr_quality.',
+          ].join('\n'),
+        },
+      }],
+    }),
+  )
+
+  server.prompt(
+    'frt-journey-from-goal',
+    'Propose and persist an FRT feature from a plain-language goal',
+    async () => ({
+      messages: [{
+        role: 'user',
+        content: {
+          type: 'text',
+          text: [
+            'Create an FRT feature from a user goal in plain language.',
+            '1. frt_search_step_library — reuse existing step defs when possible.',
+            '2. frt_propose_journey with goal and startUrl (async — poll get_job_status).',
+            '3. Review proposed Gherkin; prefer system step patterns over custom bodies.',
+            '4. frt_save_feature_draft with confirm: true.',
+            '5. frt_compile_feature — fix compile errors at source; fail loud on binding issues.',
+            '6. run_frt_feature with confirm: true.',
+            '7. frt_explain_failure on any failed steps.',
+          ].join('\n'),
+        },
+      }],
+    }),
+  )
+
+  server.prompt(
+    'jira-qa',
+    'Map a Jira ticket to VRT/FRT coverage and run quality checks',
+    async () => ({
+      messages: [{
+        role: 'user',
+        content: {
+          type: 'text',
+          text: [
+            'Implement QA coverage for a Jira ticket in VisualQ.',
+            'Ask for the ticket key and acceptance criteria if not provided.',
+            '1. frt_get_feature_groups and list_scenarios — check existing coverage.',
+            '2. Create VRT scenario (create_scenario, confirm: true) with ticket id in label if visual scope.',
+            '3. Create FRT feature (frt_save_feature_draft, confirm: true) with ticket id in name/description if functional scope.',
+            '4. run_vrt and/or run_frt_feature with confirm: true.',
+            '5. gate_pr_quality — attach structured verdict; mention ticket id in summary.',
           ].join('\n'),
         },
       }],

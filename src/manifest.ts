@@ -18,7 +18,9 @@ export interface ToolsManifest {
 
 export const TOOLS_MANIFEST = manifest as ToolsManifest
 
+import { toolsForProfile } from './profiles.js'
+
 /** Full VisualQ tool catalog — same surface as the backend MCP manifest. */
-export function manifestTools(): ManifestTool[] {
-  return TOOLS_MANIFEST.tools
+export function manifestTools(profile?: string): ManifestTool[] {
+  return toolsForProfile(profile ?? process.env.VISUALQ_TOOL_PROFILE, TOOLS_MANIFEST.tools)
 }
