@@ -9,8 +9,7 @@
   "files": [
     "dist",
     "tools-manifest.json",
-    "examples",
-    "packages"
+    "examples"
   ],
   "scripts": {
     "build": "tsc",
