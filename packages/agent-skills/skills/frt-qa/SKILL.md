@@ -21,9 +21,9 @@ Set `VISUALQ_TOOL_PROFILE=frt-qa` on the MCP server for a focused FRT toolset.
 Use MCP prompt `frt-journey-from-goal` or:
 
 1. `frt_search_step_library` — reuse steps
-2. `frt_propose_journey` (async)
-3. `frt_save_feature_draft` with `confirm: true`
-4. `frt_compile_feature` — fix errors at source, fail loud
+2. Optional: `frt_inspect_page` for grounding
+3. `frt_save_feature_draft` with `confirm: true` — **call immediately; never paste Gherkin for import**
+4. `frt_compile_feature` with `project` — fix errors at source, fail loud
 5. `run_frt_feature` with `confirm: true`
 6. `frt_explain_failure` on red steps
 

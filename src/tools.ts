@@ -120,11 +120,45 @@ async function handleCiTool(client: VisualQClient, name: string, args: Record<st
         ok: true,
         data: await client.triggerRun({ type: 'security', ...pickRunArgs(args) }),
       })
-    case 'run_full_audit':
+    case 'run_full_audit': {
+      const data = await client.triggerRun({
+        type: 'full-audit',
+        ...pickRunArgs(args),
+        ...(Array.isArray(args.pillars) ? { pillars: args.pillars } : {}),
+      })
+      const nextActions: Array<{ label: string; tool: string; args: Record<string, unknown> }> = []
+      const childRuns = [
+        { label: 'Wait for page-batch audit', id: data.pageBatchRunId as string | undefined },
+        { label: 'Wait for FRT batch', id: data.frtBatchRunId as string | undefined },
+        { label: 'Wait for tracking audit', id: data.trackingRunId as string | undefined },
+      ].filter((c): c is { label: string; id: string } => typeof c.id === 'string' && c.id.length > 0)
+
+      if (childRuns.length === 1) {
+        nextActions.push({
+          label: childRuns[0].label,
+          tool: 'wait_for_run',
+          args: { runId: childRuns[0].id },
+        })
+      } else {
+        for (const child of childRuns) {
+          nextActions.push({
+            label: child.label,
+            tool: 'wait_for_run',
+            args: { runId: child.id },
+          })
+        }
+      }
+      nextActions.push({ label: 'Check merge gate', tool: 'gate_pr_quality', args: {} })
+      nextActions.push({ label: 'Read site health', tool: 'get_site_health', args: {} })
+
+      const pillarList = Array.isArray(data.pillars) ? (data.pillars as string[]).join(', ') : 'all unlocked'
       return jsonText({
         ok: true,
-        message: 'Trigger pillar runs separately: run_vrt, run_perf, run_seo, run_a11y, run_security, run_tracking. Then get_site_health.',
+        summary: `Full audit started (${pillarList}). Parent runId: ${data.runId}.`,
+        data,
+        nextActions,
       })
+    }
     case 'get_run_status': {
       const runId = String(args.runId || '')
       if (!runId) throw new Error('runId is required')
@@ -159,5 +193,6 @@ function pickRunArgs(args: Record<string, unknown>) {
   if (typeof args.ciProvider === 'string') out.ciProvider = args.ciProvider
   if (typeof args.jiraKey === 'string') out.jiraKey = args.jiraKey
   if (args.perfBudgets && typeof args.perfBudgets === 'object') out.perfBudgets = args.perfBudgets
+  if (Array.isArray(args.pillars)) out.pillars = args.pillars
   return out
 }

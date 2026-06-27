@@ -8,6 +8,8 @@ Canonical workflows for coding agents using `@visualq/mcp`. Use the matching MCP
 npx -y @visualq/mcp
 ```
 
+Set `VISUALQ_TOOL_PROFILE=qa` (default in setup-agent).
+
 See [README](./README.md) for `VISUALQ_API_KEY` setup.
 
 ## Prompts
@@ -16,27 +18,17 @@ See [README](./README.md) for `VISUALQ_API_KEY` setup.
 |--------|----------|
 | `setup-health-review` | New project or stale setup — blockers, missing baselines |
 | `pr-quality-gate` | Before merge — VRT + FRT + rolling health verdict |
-| `frt-journey-from-goal` | Plain-language user flow → Gherkin feature |
+| `frt-journey-from-goal` | Plain-language user flow → FRT feature |
 | `onboard-new-site` | Full bootstrap: project + crawl + VRT + FRT |
 | `jira-qa` | Ticket-driven VRT/FRT coverage |
 
-## Resources (read-only)
+## Key tools (~39, qa profile)
 
-| URI | Content |
-|-----|---------|
-| `visualq://site-health` | Rolling health + coverage |
-| `visualq://quality-score` | Composite quality score |
-| `visualq://latest-failures` | Latest VRT failures |
-| `visualq://frt-step-library` | Step definition library |
-| `visualq://frt-feature-groups` | FRT folder organization |
-| `visualq://pr-quality-gate` | Current merge verdict |
-
-## Key tools
-
-- **Gate**: `gate_pr_quality`
+- **Gate**: `gate_pr_quality`, `get_site_health`
+- **Full QA**: `run_full_audit` (optional `pillars[]`) → `wait_for_run`
 - **VRT**: `run_vrt`, `get_run_failures`, `explain_vrt_failure`
-- **FRT**: `frt_save_feature_draft`, `frt_compile_feature`, `run_frt_feature`, `frt_explain_failure`
-- **Health**: `get_site_health`, `identify_blockers_for_release`
+- **FRT**: `create_frt_scenario`, `run_frt_feature`, `frt_explain_failure`
+- **Pillar reports**: `get_pillar_report`, `tracking_get_audit_report`
 
 Mutations require `"confirm": true`.
 

@@ -11,7 +11,14 @@ export interface CIRunResponse {
   projectId: string
   type: string
   environmentName?: string
+  environmentId?: string
   statusUrl: string
+  message?: string
+  /** Full audit child runs (type full-audit). */
+  pageBatchRunId?: string | null
+  frtBatchRunId?: string | null
+  trackingRunId?: string | null
+  pillars?: string[]
 }
 
 export interface CIStatusResponse {

@@ -1,6 +1,6 @@
 # @visualq/mcp
 
-MCP server for [VisualQ](https://visualq.ai) — full QA tool catalog (VRT, FRT, pillars, tracking) for Cursor, Claude Desktop, or any MCP client.
+MCP server for [VisualQ](https://visualq.ai) — **qa profile** (~39 tools): full multi-pillar audit, VRT/FRT, tracking config, rolling health. For Cursor, Claude Desktop, or any MCP client.
 
 ## Production setup (recommended)
 
@@ -28,7 +28,7 @@ npx @visualq/setup-agent cursor --key vq_org_live_… --project my-site
       "env": {
         "VISUALQ_API_KEY": "vq_org_live_…",
         "VISUALQ_BASE_URL": "https://visualq.ai",
-        "VISUALQ_TOOL_PROFILE": "vrt-qa"
+        "VISUALQ_TOOL_PROFILE": "qa"
       }
     }
   }
@@ -56,7 +56,7 @@ Pass `project` on every tool call (slug or id), e.g. `"project": "afp-com"`.
 | `VISUALQ_API_KEY` | yes | — | Org agent key `vq_org_live_…` or legacy project key `vq_live_…` |
 | `VISUALQ_BASE_URL` | no | `https://visualq.ai` | VisualQ instance (use your origin for self-hosted) |
 | `VISUALQ_DEFAULT_PROJECT` | no | — | Default project slug injected into tool args |
-| `VISUALQ_TOOL_PROFILE` | no | all tools | `vrt-qa`, `frt-qa`, `tracking-qa`, or `full` |
+| `VISUALQ_TOOL_PROFILE` | no | `qa` | `qa` (recommended), `full`, or legacy aliases `vrt-qa` / `frt-qa` / `tracking-qa` → `qa` |
 | `VISUALQ_MCP_HTTP` | no | — | Set `1` to run local Streamable HTTP on `127.0.0.1:3847` |
 | `VISUALQ_MCP_PORT` | no | `3847` | HTTP mode port |
 
@@ -72,9 +72,13 @@ Org agent keys support **`mcp_read`** and **`mcp_full`** only.
 
 ## Typical agent workflows
 
-**Quality MCP PR gate:** `gate_pr_quality` → fix with `explain_vrt_failure` / `frt_explain_failure` → re-run
+**Quality MCP PR gate:** `gate_pr_quality` → fix with `explain_vrt_failure` / `frt_heal_step_def` → `run_vrt` or `run_full_audit`
 
-**Onboard a site:** `create_project` → `crawl_site` → `create_scenario` → `run_baseline` → `frt_save_feature_draft` → `frt_compile_feature` → `run_frt_feature`
+**Onboard a site:** `create_project` → `crawl_site` → `create_scenario` → `run_baseline` → `create_frt_scenario` → `run_frt_feature`
+
+**Full QA:** `run_full_audit` (optional `pillars[]`) → `wait_for_run` → `gate_pr_quality` → `get_site_health`
+
+**Pillar-only audit:** `run_full_audit` with `pillars: ["a11y"]`, `["tracking"]`, etc.
 
 **Pre-merge VRT:** `list_scenarios` → `run_vrt` → `get_run_failures` → `explain_vrt_failure`
 

@@ -10,7 +10,7 @@ Install VisualQ MCP config, skills, and rules.
 Options:
   --key <vq_org_live_…>     Org agent API key (required for install)
   --project <slug>          Default project slug
-  --profile <name>          Tool profile: vrt-qa (default), frt-qa, tracking-qa, full
+  --profile <name>          Tool profile: qa (default), full
   --base-url <url>          VisualQ base URL (default: https://visualq.ai)
   --deeplink                Print Cursor deeplink only (no file writes)
   --help                    Show this help
@@ -26,7 +26,7 @@ function parseArgs(argv: string[]) {
 
   let apiKey = process.env.VISUALQ_API_KEY ?? ''
   let defaultProject: string | undefined
-  let toolProfile = 'vrt-qa'
+  let toolProfile = 'qa'
   let baseUrl = process.env.VISUALQ_BASE_URL ?? 'https://visualq.ai'
   let deeplinkOnly = false
 
@@ -34,7 +34,7 @@ function parseArgs(argv: string[]) {
     const arg = argv[i]
     if (arg === '--key') apiKey = argv[++i] ?? ''
     else if (arg === '--project') defaultProject = argv[++i]
-    else if (arg === '--profile') toolProfile = argv[++i] ?? 'vrt-qa'
+    else if (arg === '--profile') toolProfile = argv[++i] ?? 'qa'
     else if (arg === '--base-url') baseUrl = argv[++i] ?? baseUrl
     else if (arg === '--deeplink') deeplinkOnly = true
     else if (arg === '--help' || arg === '-h') {

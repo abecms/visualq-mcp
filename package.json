@@ -1,7 +1,7 @@
 {
   "name": "@visualq/mcp",
-  "version": "0.7.0",
-  "description": "MCP server for VisualQ — run VRT, read failures, and diagnose from your IDE",
+  "version": "1.0.0",
+  "description": "MCP server for VisualQ — qa profile (~39 tools): run_full_audit, VRT/FRT, tracking, rolling health",
   "type": "module",
   "bin": {
     "visualq-mcp": "dist/index.js"
