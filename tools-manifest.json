@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "generatedAt": "2026-06-27T21:57:25.667Z",
+  "generatedAt": "2026-07-08T17:35:46.565Z",
   "tools": [
     {
       "name": "list_projects",
@@ -96,7 +96,7 @@
     },
     {
       "name": "run_full_audit",
-      "description": "Run multi-pillar quality audit. Default: all unlocked pillars. Pass pillars[] for subset (visual, functional, a11y, perf, seo, security, tracking). Pass scenarios[] to limit VRT pages.",
+      "description": "Run multi-pillar quality audit. Default: all unlocked pillars. Pass pillars[] for subset (visual, functional, a11y, perf, seo, security, tracking, privacy). Pass scenarios[] to limit VRT pages.",
       "source": "ci",
       "phase": 2,
       "mutating": true,
@@ -823,6 +823,38 @@
       ]
     },
     {
+      "name": "tracking_discover_from_pages",
+      "description": "Bootstrap a tracking plan by visiting VRT pages and inferring datalayer variables. Only when no plan exists. confirm: true persists; omit or false returns preview.",
+      "source": "invoke",
+      "phase": 3,
+      "mutating": true,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
+          "scenarioIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Optional subset of VRT scenario ids; default all pages with URLs"
+          },
+          "confirm": {
+            "type": "boolean",
+            "description": "Must be true for mutating tools"
+          }
+        }
+      },
+      "async": false
+    },
+    {
       "name": "create_content_rule",
       "description": "Add content normalization rule on a scenario.",
       "source": "invoke",
@@ -1165,7 +1197,7 @@
     },
     {
       "name": "frt_get_feature_groups",
-      "description": "FRT feature folder organization snapshot (groups and ungrouped feature names).",
+      "description": "FRT feature folder organization snapshot with step summaries (featureId, stepCount, startPath).",
       "source": "invoke",
       "phase": 2,
       "mutating": false,
@@ -1181,6 +1213,42 @@
             "description": "Environment slug or id"
           }
         }
+      },
+      "async": false
+    },
+    {
+      "name": "frt_find_scenarios",
+      "description": "Search existing FRT scenarios by goal text, JIRA ticket (e.g. BN-470), book/rail name, or step content. Call BEFORE create_frt_scenario to reuse an existing featureId.",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
+          "query": {
+            "type": "string",
+            "description": "Search text — goal, ticket id, feature name, or step labels"
+          },
+          "ticketId": {
+            "type": "string",
+            "description": "Optional ticket id override (e.g. BN-470)"
+          },
+          "limit": {
+            "type": "number",
+            "description": "Max matches (default 10)"
+          }
+        },
+        "required": [
+          "query"
+        ]
       },
       "async": false
     },
@@ -1248,7 +1316,8 @@
               "a11y",
               "perf",
               "seo",
-              "security"
+              "security",
+              "privacy"
             ],
             "description": "Page audit pillar"
           },
@@ -1453,7 +1522,7 @@
     },
     {
       "name": "create_frt_scenario",
-      "description": "Create and persist an FRT functional test scenario in VisualQ from a plain-language goal. Use when the user asks to make/create an FRT scenario, \"faire un scénario FRT\", \"test this flow with VisualQ MCP\", or describes a user journey in natural language (start page, actions, expected results). Builds Gherkin, binds the step library, saves to the project — never paste Gherkin in chat instead of calling this tool.",
+      "description": "Create and persist an FRT functional test scenario in VisualQ from a plain-language goal. Call frt_find_scenarios first to reuse existing scenarios. User goal may be French; Gherkin steps are always English. For tracking payload checks use tracking_get_plan + run_tracking — do not put tracking verification in goal.",
       "source": "invoke",
       "phase": 3,
       "mutating": true,
@@ -1470,7 +1539,7 @@
           },
           "goal": {
             "type": "string",
-            "description": "Plain-language test goal — pass the user request verbatim (e.g. \"from /search/site search Chambord and expect collection cards\")."
+            "description": "Plain-language test goal — pass the user request verbatim (French or English). Describe user actions only (visit, scroll, click)."
           },
           "name": {
             "type": "string",
@@ -1484,14 +1553,6 @@
             "type": "string",
             "description": "Optional start path when not obvious in goal, e.g. \"/search/site\""
           },
-          "language": {
-            "type": "string",
-            "enum": [
-              "en",
-              "fr"
-            ],
-            "description": "Gherkin language (default en)"
-          },
           "baseUrl": {
             "type": "string",
             "description": "Optional base URL override for the feature"
@@ -1499,6 +1560,10 @@
           "compile": {
             "type": "boolean",
             "description": "Compile step bindings after save (default true)"
+          },
+          "forceCreate": {
+            "type": "boolean",
+            "description": "Skip resolve-first and always create a new scenario"
           },
           "confirm": {
             "type": "boolean",

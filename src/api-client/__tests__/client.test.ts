@@ -39,4 +39,19 @@ describe('VisualQClient', () => {
     )
     expect(res.ok).toBe(true)
   })
+
+  it('returns structured http_error on non-JSON response', async () => {
+    const fetchMock = vi.fn(async () => new Response('An error occurred while processing your request', {
+      status: 504,
+      headers: { 'content-type': 'text/plain' },
+    }))
+    vi.stubGlobal('fetch', fetchMock)
+
+    const client = new VisualQClient({ apiKey: 'vq_live_test', baseUrl: 'https://visualq.ai' })
+    const res = await client.invokeTool('create_frt_scenario', { confirm: true, goal: 'test' })
+
+    expect(res.ok).toBe(false)
+    expect(res.error?.code).toBe('http_error')
+    expect(res.error?.message).toContain('504')
+  })
 })

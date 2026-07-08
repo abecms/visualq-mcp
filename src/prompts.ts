@@ -155,7 +155,7 @@ export function registerPrompts(server: McpServer) {
           text: [
             'Implement QA coverage for a Jira ticket in VisualQ.',
             'Ask for the ticket key and acceptance criteria if not provided.',
-            '1. frt_get_feature_groups and list_scenarios — check existing coverage.',
+            '1. frt_find_scenarios(query=goal) and frt_get_feature_groups — check existing FRT coverage before create_frt_scenario.',
             '2. Create VRT scenario (create_scenario, confirm: true) with ticket id in label if visual scope.',
             '3. Create FRT feature (create_frt_scenario, confirm: true) with ticket id in name if functional scope.',
             '4. run_vrt and/or run_frt_feature with confirm: true.',

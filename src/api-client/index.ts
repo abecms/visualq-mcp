@@ -5,6 +5,7 @@ import type {
   ToolResponse,
   VisualQClientConfig,
 } from './types.js'
+import { parseApiResponseBody } from './parse-response.js'
 
 const DEFAULT_POLL_INTERVAL_MS = 5_000
 const DEFAULT_MAX_POLL_MS = 300_000
@@ -81,16 +82,32 @@ export class VisualQClient {
   }
 
   async invokeTool(tool: string, args: Record<string, unknown> = {}): Promise<ToolResponse> {
-    const res = await fetch(this.url('/api/mcp/v1/invoke'), {
+    const path = '/api/mcp/v1/invoke'
+    const res = await fetch(this.url(path), {
       method: 'POST',
       headers: this.headers(),
       body: JSON.stringify({ tool, args }),
     })
-    const payload = await res.json() as ToolResponse
-    if (!res.ok && !payload.error) {
-      throw new VisualQApiError(`invoke ${tool} failed: ${res.status}`, res.status)
+    try {
+      const payload = await parseApiResponseBody<ToolResponse>(res, 'POST', path)
+      if (!res.ok && !payload.error) {
+        throw new VisualQApiError(`invoke ${tool} failed: ${res.status}`, res.status)
+      }
+      return payload
+    } catch (err) {
+      if (err instanceof VisualQApiError) throw err
+      const message = err instanceof Error ? err.message : String(err)
+      return {
+        ok: false,
+        tool,
+        summary: message,
+        data: null,
+        warnings: [],
+        nextActions: [],
+        error: { code: 'http_error', message },
+        recoverable: true,
+      }
     }
-    return payload
   }
 }
 

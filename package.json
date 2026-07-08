@@ -1,6 +1,6 @@
 {
   "name": "@visualq/mcp",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "MCP server for VisualQ — qa profile (~39 tools): run_full_audit, VRT/FRT, tracking, rolling health",
   "type": "module",
   "bin": {
