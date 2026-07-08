@@ -193,6 +193,7 @@ function pickRunArgs(args: Record<string, unknown>) {
   if (typeof args.ciProvider === 'string') out.ciProvider = args.ciProvider
   if (typeof args.jiraKey === 'string') out.jiraKey = args.jiraKey
   if (args.perfBudgets && typeof args.perfBudgets === 'object') out.perfBudgets = args.perfBudgets
+  if (args.a11yBudgets && typeof args.a11yBudgets === 'object') out.a11yBudgets = args.a11yBudgets
   if (Array.isArray(args.pillars)) out.pillars = args.pillars
   return out
 }
