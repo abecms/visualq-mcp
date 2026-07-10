@@ -14,55 +14,49 @@ Set `VISUALQ_TOOL_PROFILE=tracking-qa` on the MCP server for a focused tracking 
 
 1. Always pass `project` on every tool.
 2. Link mutations need `confirm: true` (`tracking_link_event_frt`, `tracking_upsert_event`).
-3. After `run_tracking` → `wait_for_run` → `tracking_get_audit_report`.
+3. Site-wide review: `tracking_get_audit_report` — **never** use its global score as JIRA ticket proof.
 
 ## JIRA proof (ticket → semantic intent → tableau)
 
-For a bug ticket with a precise repro (e.g. BN-470 rail + content title):
+For a bug ticket (e.g. BN-448 account tabs, BN-470 rail click):
 
-1. Read the ticket via JIRA MCP and build an **action-only** `reproGoal` (no tracking verification clauses).
+1. Read the ticket via JIRA MCP and build an **action-only** `reproGoal`.
 2. `tracking_prove_jira_ticket` with `confirm: true` — **one call** (async). Poll `get_job_status` until completed.
-3. Verify before commenting:
-   - `result.proofVerdict === 'proven'`
-   - `result.scenario.matchesTicketIntent === true`
-   - `result.eventStatus === 'pass'`
-4. `jira_add_comment` with `result.jiraMarkdown` **verbatim** — do not paraphrase the table.
-5. Or, on an existing audit: `tracking_get_audit_event_proof` with `featureId` or `eventColumnKey`.
+3. If `proofContract.mayClaimTicketFixed`:
+   - `jira_add_comment` with `result.jiraMarkdown` **verbatim**
+4. If **NOT** proven — **investigation ladder** (do **not** run `run_full_audit`):
+   - Read `investigationLadder` from the tool response
+   - `frt_get_feature(featureId, ticketId, reproGoal)` — analyze Gherkin + `scenarioCoverageAnalysis`
+   - If still inconclusive: propose **manual recette on the live site** (`human_handoff` steps)
 
-Literal repro strings (rail name, book title, position) are **examples for the Jira comment**, not match keys. A generic scenario like « Select a book in a rail » is valid proof when `matchesTicketIntent: true`.
+## Forbidden for JIRA proof
 
-Do **not** manually chain `frt_find_scenarios` → `run_frt_feature` → `run_tracking` for JIRA proof — use `tracking_prove_jira_ticket` first.
+- `run_full_audit`, global scores (757/757), `gate_pr_quality`, `get_site_health` as ticket proof
+- Initial chain: `frt_find_scenarios` → `run_frt_feature` → `run_full_audit`
+- Reading app source to infer payloads
+- JIRA comment « corrigé » or RECETTE without `proofVerdict: proven`
 
-Do **not** create ticket-named FRT scenarios (`BN-470 — …`) when a generic linked scenario covers the same tracking intent.
+## Allowed after failed prove (read-only)
+
+- `frt_find_scenarios`, `frt_get_feature`, `tracking_get_plan`, re-prove via `tracking_prove_jira_ticket`
 
 ## Post-call checklist
 
 ```
-□ tracking_prove_jira_ticket called first (not frt_find_scenarios)
-□ get_job_status polled until completed
-□ proofVerdict === 'proven'
-□ matchesTicketIntent === true
-□ Jira comment = jiraMarkdown verbatim
-□ No app source code read for payload inference
+□ tracking_prove_jira_ticket called first
+□ get_job_status polled until terminal state
+□ If proven: jiraMarkdown verbatim + proofContract.mayClaimTicketFixed
+□ If not: NON + investigationLadder + frt_get_feature analysis
+□ No run_full_audit for JIRA conclusion
 ```
 
-## Review coverage
+## Review site-wide coverage (not JIRA ticket proof)
 
 1. `tracking_get_plan` — overview
 2. `tracking_list_events` — find uncovered events
-3. `tracking_get_event` — attributes + FRT links
-4. `tracking_get_audit_report` — failures by feature/step
+3. `tracking_get_audit_report` — SITE-WIDE scores only
 
-## Link event to FRT step
+## Prompts
 
-1. `tracking_link_event_frt` with `confirm: true`
-2. `run_tracking` with `confirm: true`
-3. Re-check `tracking_get_audit_report`
-
-## Prompt
-
-Use MCP prompt `diagnose-tracking-audit` for guided workflow.
-
-## PR context
-
-Include tracking pillar in `gate_pr_quality` verdict when gating releases.
+- `jira-tracking-proof` — initial prove
+- `jira-tracking-proof-investigate` — after failed prove

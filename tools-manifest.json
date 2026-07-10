@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "generatedAt": "2026-07-10T06:40:45.610Z",
+  "generatedAt": "2026-07-10T20:27:19.296Z",
   "tools": [
     {
       "name": "list_projects",
@@ -96,7 +96,7 @@
     },
     {
       "name": "run_full_audit",
-      "description": "Run multi-pillar quality audit. Default: all unlocked pillars. Pass pillars[] for subset (visual, functional, a11y, perf, seo, security, tracking, privacy). Pass scenarios[] to limit VRT pages.",
+      "description": "Site-wide multi-pillar audit. Never substitute for JIRA ticket tracking proof — use tracking_prove_jira_ticket instead.",
       "source": "ci",
       "phase": 2,
       "mutating": true,
@@ -400,7 +400,7 @@
     },
     {
       "name": "tracking_get_audit_report",
-      "description": "Tracking audit bilan (global score, suite table). FRT-verified events include frt.featureId + frt.stepIndex on eventResults — match plan links by featureId, not scenario name. Per-step audit: hits captured during the linked step only.",
+      "description": "Tracking audit bilan (global score, suite table). SITE-WIDE scope only — never substitute for JIRA ticket proof; use tracking_prove_jira_ticket instead.",
       "source": "invoke",
       "phase": 2,
       "mutating": false,
@@ -425,7 +425,7 @@
     },
     {
       "name": "tracking_get_audit_event_proof",
-      "description": "Per-event tracking proof for JIRA: reportUrl, linked event + FRT scenario, and variable table (plan attribute, Piano key, expected, received, status). Filter by featureId or eventColumnKey on an existing audit.",
+      "description": "Per-event tracking proof: requires ticketId for JIRA conclusions. Without tracking_prove_jira_ticket, a passing event does not prove a ticket is fixed.",
       "source": "invoke",
       "phase": 2,
       "mutating": false,
@@ -452,6 +452,10 @@
             "type": "string",
             "description": "Linked FRT feature id"
           },
+          "ticketId": {
+            "type": "string",
+            "description": "JIRA ticket id — required to claim ticket fixed"
+          },
           "includeSkipped": {
             "type": "boolean",
             "description": "Include not_set variables that passed"
@@ -462,7 +466,7 @@
     },
     {
       "name": "tracking_prove_jira_ticket",
-      "description": "Use first for JIRA tracking proof. Resolves ticket intent semantically, picks linked generic FRT scenario, runs tracking audit, returns reportUrl + variable table + jiraMarkdown.",
+      "description": "Use this first when proving a JIRA tracking ticket. Resolves ticket intent semantically (not literal repro strings), picks a linked generic FRT scenario when it covers the same user action, runs tracking audit (async — poll get_job_status), returns reportUrl + variable table + jiraMarkdown + proofVerdict.",
       "source": "invoke",
       "phase": 2,
       "mutating": true,
@@ -495,7 +499,7 @@
           },
           "createIfMissing": {
             "type": "boolean",
-            "description": "Create exact FRT scenario when none matches (default true)"
+            "description": "Create FRT scenario from generic intent when no linked scenario matches (default true)"
           },
           "runTracking": {
             "type": "boolean",
@@ -503,7 +507,7 @@
           },
           "allowGenericFallback": {
             "type": "boolean",
-            "description": "Allow generic linked scenario when no exact match (default false)"
+            "description": "When createIfMissing=false, use first linked scenario even if intent confidence is low"
           },
           "jiraUrl": {
             "type": "string",
@@ -520,7 +524,7 @@
           "confirm"
         ]
       },
-      "async": false,
+      "async": true,
       "required": [
         "ticketId",
         "reproGoal",
@@ -1150,6 +1154,42 @@
       "async": true
     },
     {
+      "name": "frt_get_feature",
+      "description": "Read one FRT feature: full Gherkin, steps, linked tracking events, and scenario coverage analysis for a JIRA ticket intent. Use after failed tracking_prove_jira_ticket — not a substitute for audit proof.",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
+          "featureId": {
+            "type": "string",
+            "description": "FRT feature Firestore id"
+          },
+          "ticketId": {
+            "type": "string",
+            "description": "Optional JIRA ticket for coverage analysis (e.g. BN-448)"
+          },
+          "reproGoal": {
+            "type": "string",
+            "description": "Optional ticket repro for coverage analysis"
+          }
+        },
+        "required": [
+          "featureId"
+        ]
+      },
+      "async": false
+    },
+    {
       "name": "get_job_status",
       "description": "Poll async MCP job status and result.",
       "source": "invoke",
@@ -1358,7 +1398,7 @@
     },
     {
       "name": "gate_pr_quality",
-      "description": "Structured PR merge verdict aggregating VRT failures, latest FRT batch, and rolling health blockers.",
+      "description": "Structured PR merge verdict aggregating VRT failures, latest FRT batch, and rolling health blockers. Never substitute for JIRA ticket tracking proof.",
       "source": "invoke",
       "phase": 2,
       "mutating": false,

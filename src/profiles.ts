@@ -19,6 +19,7 @@ export const TOOL_PROFILES: Record<ToolProfileName, readonly string[] | null> = 
     'run_vrt',
     'create_frt_scenario',
     'frt_find_scenarios',
+    'frt_get_feature',
     'run_frt_feature',
     'frt_get_feature_groups',
     'run_full_audit',
