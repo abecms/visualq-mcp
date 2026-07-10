@@ -176,8 +176,28 @@ async function handleClientTool(client: VisualQClient, name: string, args: Recor
   if (!runId) throw new Error('runId is required')
 
   const maxWaitMs = typeof args.maxWaitMs === 'number' ? args.maxWaitMs : undefined
-  const status = await client.waitForRun(runId, { maxMs: maxWaitMs })
+  const effectiveRunId = await resolveWaitRunId(client, runId)
+  const status = await client.waitForRun(effectiveRunId, { maxMs: maxWaitMs })
   return jsonText({ ok: true, data: status })
+}
+
+/** When polling a full-suite parent, prefer the tracking child if it is the only pillar run. */
+async function resolveWaitRunId(client: VisualQClient, runId: string): Promise<string> {
+  try {
+    const initial = await client.getRunStatus(runId)
+    if (
+      initial.type === 'full-suite-test'
+      && typeof initial.trackingRunId === 'string'
+      && initial.trackingRunId.length > 0
+      && !initial.pageBatchRunId
+      && !initial.frtBatchRunId
+    ) {
+      return initial.trackingRunId
+    }
+  } catch {
+    // Keep original runId — caller may already pass a child run id.
+  }
+  return runId
 }
 
 function pickRunArgs(args: Record<string, unknown>) {

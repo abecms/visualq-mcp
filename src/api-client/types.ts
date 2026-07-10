@@ -29,6 +29,10 @@ export interface CIStatusResponse {
   duration?: number
   summary?: { total: number; passed: number; failed: number }
   error?: string
+  /** Present on full-suite-test parent runs. */
+  pageBatchRunId?: string | null
+  frtBatchRunId?: string | null
+  trackingRunId?: string | null
 }
 
 export interface ToolResponse {

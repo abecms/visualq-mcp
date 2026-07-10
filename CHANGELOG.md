@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.0.4 — 2026-07-10
+
+### Changed
+
+- MCP instructions: agents must say **NON** explicitly when `proofOutcome.proven: false`, `ok: false`, or `NOT FOUND` — quote `proofOutcome.headline` and follow `nextActions`.
+- **`tracking_prove_jira_ticket`**: async job flow documented; poll `get_job_status` until completed.
+- **`frt_find_scenarios`**: empty matches return `NOT FOUND` with `nextActions` → `create_frt_scenario` or `tracking_prove_jira_ticket`.
+- **`wait_for_run`**: resolves `trackingRunId` from tracking-only full audit parent runs.
+- **`tracking-qa` skill**: anti-hallucination rules, verbatim `jiraMarkdown`, explicit failure headlines.
+
+### Requirements
+
+- VisualQ backend must include `proofOutcome`, async prove jobs, and enriched `response-adapter` — deploy `visualq` before using failure headlines in production.
+
 ## 1.0.3 — 2026-07-10
 
 ### Changed
