@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "generatedAt": "2026-07-08T17:35:46.565Z",
+  "generatedAt": "2026-07-10T00:21:08.825Z",
   "tools": [
     {
       "name": "list_projects",
@@ -422,6 +422,110 @@
         }
       },
       "async": false
+    },
+    {
+      "name": "tracking_get_audit_event_proof",
+      "description": "Per-event tracking proof for JIRA: reportUrl, linked event + FRT scenario, and variable table (plan attribute, Piano key, expected, received, status). Filter by featureId or eventColumnKey on an existing audit.",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
+          "auditId": {
+            "type": "string",
+            "description": "Tracking audit id (defaults to latest)"
+          },
+          "eventColumnKey": {
+            "type": "string",
+            "description": "Plan event column key (e.g. click.navigation::5)"
+          },
+          "featureId": {
+            "type": "string",
+            "description": "Linked FRT feature id"
+          },
+          "includeSkipped": {
+            "type": "boolean",
+            "description": "Include not_set variables that passed"
+          }
+        }
+      },
+      "async": false
+    },
+    {
+      "name": "tracking_prove_jira_ticket",
+      "description": "JIRA ticket → exact FRT scenario (find or create), link to plan event, run tracking audit, return same proof shape as tracking_get_audit_event_proof (reportUrl + variable table + jiraMarkdown).",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": true,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
+          "ticketId": {
+            "type": "string",
+            "description": "JIRA ticket id (e.g. BN-470)"
+          },
+          "reproGoal": {
+            "type": "string",
+            "description": "Actionable repro steps extracted from the ticket (English or French)"
+          },
+          "eventColumnKey": {
+            "type": "string",
+            "description": "Plan event column key (default click.navigation::5 for homepage rail)"
+          },
+          "startPath": {
+            "type": "string",
+            "description": "FRT start path (default /)"
+          },
+          "createIfMissing": {
+            "type": "boolean",
+            "description": "Create exact FRT scenario when none matches (default true)"
+          },
+          "runTracking": {
+            "type": "boolean",
+            "description": "Run a fresh tracking audit (default true)"
+          },
+          "allowGenericFallback": {
+            "type": "boolean",
+            "description": "Allow generic linked scenario when no exact match (default false)"
+          },
+          "jiraUrl": {
+            "type": "string",
+            "description": "Optional JIRA browse URL for jiraMarkdown"
+          },
+          "confirm": {
+            "type": "boolean",
+            "description": "Must be true for mutating tools"
+          }
+        },
+        "required": [
+          "ticketId",
+          "reproGoal",
+          "confirm"
+        ]
+      },
+      "async": false,
+      "required": [
+        "ticketId",
+        "reproGoal",
+        "confirm"
+      ]
     },
     {
       "name": "tracking_set_page_attribute",

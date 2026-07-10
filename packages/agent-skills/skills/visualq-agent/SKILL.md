@@ -8,7 +8,7 @@ description: >-
 
 # VisualQ Agent Workflows — Quality MCP for Coding Agents
 
-VisualQ is **the Quality MCP** for Cursor, Claude Code, and CI agents. Install `@visualq/mcp` alongside Playwright MCP:
+VisualQ is a **Quality OS**; **`@visualq/mcp`** is the agent interface for Cursor, Claude Code, and CI agents. Install it alongside Playwright MCP:
 
 - **Playwright MCP** — local browser exploration (hands + eyes)
 - **VisualQ MCP** — persistent quality memory, gates, baselines, multi-pillar audits, FRT contracts, rolling health
