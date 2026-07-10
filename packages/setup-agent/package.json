@@ -17,7 +17,7 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@visualq/agent-skills": "^1.0.0"
+    "@visualq/agent-skills": "^1.0.1"
   },
   "keywords": [
     "visualq",
