@@ -1,7 +1,7 @@
 {
   "name": "@visualq/mcp",
-  "version": "1.0.1",
-  "description": "MCP server for VisualQ — qa profile (~39 tools): run_full_audit, VRT/FRT, tracking, rolling health",
+  "version": "1.0.2",
+  "description": "MCP server for VisualQ — qa profile (43 tools): run_full_audit, VRT/FRT, tracking proof, rolling health",
   "type": "module",
   "bin": {
     "visualq-mcp": "dist/index.js"

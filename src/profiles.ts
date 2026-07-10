@@ -2,7 +2,8 @@ import type { ManifestTool } from './manifest.js'
 
 export type ToolProfileName = 'qa' | 'vrt-qa' | 'frt-qa' | 'tracking-qa' | 'full'
 
-/** Subset of tools per agent persona — filters manifest at MCP startup only. */
+/** Subset of tools per agent persona — filters manifest at MCP startup only.
+ *  Keep in sync with visualq/src/lib/mcp/mcp-invoke-config.ts MCP_QA_ALLOWLIST */
 export const TOOL_PROFILES: Record<ToolProfileName, readonly string[] | null> = {
   qa: [
     'list_projects',
@@ -35,6 +36,7 @@ export const TOOL_PROFILES: Record<ToolProfileName, readonly string[] | null> = 
     'create_content_rule',
     'frt_heal_step_def',
     'tracking_get_plan',
+    'tracking_discover_from_pages',
     'tracking_upsert_page',
     'tracking_upsert_event',
     'tracking_set_page_attribute',
@@ -42,6 +44,8 @@ export const TOOL_PROFILES: Record<ToolProfileName, readonly string[] | null> = 
     'tracking_link_page_scenario',
     'tracking_link_event_frt',
     'tracking_get_audit_report',
+    'tracking_get_audit_event_proof',
+    'tracking_prove_jira_ticket',
     'frt_inspect_page',
     'frt_search_step_library',
     'post_pr_comment',

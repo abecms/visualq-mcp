@@ -26,6 +26,15 @@ describe('toolsForProfile', () => {
     expect(tools.length).toBe(all.filter((t) => t.phase <= 3).length)
   })
 
+  it('qa profile includes JIRA tracking proof tools', () => {
+    const tools = toolsForProfile('qa', all)
+    const names = new Set(tools.map((t) => t.name))
+    expect(names.has('tracking_get_audit_event_proof')).toBe(true)
+    expect(names.has('tracking_prove_jira_ticket')).toBe(true)
+    expect(names.has('tracking_discover_from_pages')).toBe(true)
+    expect(tools.length).toBe(43)
+  })
+
   it('every qa profile tool name exists in manifest', () => {
     const manifestNames = new Set(all.map((t) => t.name))
     for (const name of TOOL_PROFILES.qa ?? []) {

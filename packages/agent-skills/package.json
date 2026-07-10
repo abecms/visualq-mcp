@@ -1,7 +1,7 @@
 {
   "name": "@visualq/agent-skills",
-  "version": "1.0.0",
-  "description": "Official VisualQ agent skills and rules for Cursor and Claude Code",
+  "version": "1.0.1",
+  "description": "Official VisualQ agent skills and rules for Cursor and Claude Code (tracking JIRA proof workflow)",
   "type": "module",
   "files": [
     "skills",

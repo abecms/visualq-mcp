@@ -1,6 +1,6 @@
 # @visualq/mcp
 
-MCP server for [VisualQ](https://visualq.ai) — the **Quality OS** agent interface. **`@visualq/mcp`** exposes ~39 tools: multi-pillar audit, VRT/FRT, tracking config, rolling health. For Cursor, Claude Desktop, or any MCP client.
+MCP server for [VisualQ](https://visualq.ai) — the **Quality OS** agent interface. **`@visualq/mcp`** exposes **43 tools** (qa profile): multi-pillar audit, VRT/FRT, tracking plan + JIRA proof, rolling health. For Cursor, Claude Desktop, or any MCP client.
 
 ## Production setup (recommended)
 
@@ -84,7 +84,9 @@ Org agent keys support **`mcp_read`** and **`mcp_full`** only.
 
 **FRT in CI:** GitHub Action `type: frt` or `visualq frt --api-key …`
 
-**Jira-driven QA:** read ticket → `create_scenario` / `frt_save_feature_draft` with ticket id in name/description → run tests
+**Jira tracking proof:** read ticket → `tracking_prove_jira_ticket` with `confirm: true` → paste `jiraMarkdown` into JIRA. Or `tracking_get_audit_event_proof` on an existing audit.
+
+**Jira-driven QA:** read ticket → `create_scenario` / `create_frt_scenario` with ticket id in name → run tests
 
 Mutating tools require **`confirm: true`** in arguments.
 
@@ -139,6 +141,8 @@ Before publishing to npm:
 cd ../visualq && npm run mcp:export-manifest
 cd ../visualq-mcp && npm test && npm run build && npm run sync-manifest
 npm publish --access public
+# Optional: publish agent skills if skills/ changed
+cd packages/agent-skills && npm publish --access public
 ```
 
 ## Repository
