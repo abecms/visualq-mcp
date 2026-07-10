@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.2 — 2026-07-10
+
+### Changed
+
+- **tracking-qa** skill: semantic JIRA tracking proof — generic linked FRT scenarios are valid when intent matches; use `tracking_prove_jira_ticket` as single entry point.
+
 ## 1.0.1 — 2026-07-10
 
 ### Changed

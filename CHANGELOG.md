@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.0.3 — 2026-07-10
+
+### Changed
+
+- MCP server instructions: **`>>> JIRA TRACKING PROOF <<<`** — agents call `tracking_prove_jira_ticket` in one step; no manual FRT chain.
+- New MCP prompt **`jira-tracking-proof`** for guided ticket proof workflow.
+- **`tracking-qa` skill**: semantic intent matching (generic linked scenarios are valid proof).
+- **`tracking_prove_jira_ticket`** tool description: intent-first resolution, not literal repro strings.
+
+### Requirements
+
+- VisualQ backend must include semantic intent resolver (`resolve-ticket-tracking-intent.ts`) — deploy `visualq` before using intent matching in production.
+
 ## 1.0.2 — 2026-07-10
 
 ### Added

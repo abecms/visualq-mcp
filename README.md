@@ -84,7 +84,7 @@ Org agent keys support **`mcp_read`** and **`mcp_full`** only.
 
 **FRT in CI:** GitHub Action `type: frt` or `visualq frt --api-key …`
 
-**Jira tracking proof:** read ticket → `tracking_prove_jira_ticket` with `confirm: true` → paste `jiraMarkdown` into JIRA. Or `tracking_get_audit_event_proof` on an existing audit.
+**Jira tracking proof:** read ticket → `tracking_prove_jira_ticket` with `confirm: true` (semantic intent → generic linked scenario) → paste `jiraMarkdown` into JIRA.
 
 **Jira-driven QA:** read ticket → `create_scenario` / `create_frt_scenario` with ticket id in name → run tests
 

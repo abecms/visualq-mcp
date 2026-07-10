@@ -145,6 +145,27 @@ export function registerPrompts(server: McpServer) {
   )
 
   server.prompt(
+    'jira-tracking-proof',
+    'Prove a JIRA tracking ticket with one VisualQ call',
+    async () => ({
+      messages: [{
+        role: 'user',
+        content: {
+          type: 'text',
+          text: [
+            'Prove a JIRA tracking ticket fix in VisualQ.',
+            '1. Read the ticket via JIRA MCP (summary + description).',
+            '2. tracking_prove_jira_ticket(ticketId, reproGoal from ticket, confirm: true) — ONE call.',
+            '3. Paste data.jiraMarkdown into the JIRA comment.',
+            'Do NOT chain frt_find_scenarios, run_frt_feature, run_full_audit, or read app source.',
+            'Literal repro strings (rail name, book title) are examples — the tool matches tracking intent semantically.',
+          ].join('\n'),
+        },
+      }],
+    }),
+  )
+
+  server.prompt(
     'jira-qa',
     'Map a Jira ticket to VRT/FRT coverage and run quality checks',
     async () => ({

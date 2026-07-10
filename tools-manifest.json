@@ -462,7 +462,7 @@
     },
     {
       "name": "tracking_prove_jira_ticket",
-      "description": "JIRA ticket → exact FRT scenario (find or create), link to plan event, run tracking audit, return same proof shape as tracking_get_audit_event_proof (reportUrl + variable table + jiraMarkdown).",
+      "description": "Use first for JIRA tracking proof. Resolves ticket intent semantically, picks linked generic FRT scenario, runs tracking audit, returns reportUrl + variable table + jiraMarkdown.",
       "source": "invoke",
       "phase": 2,
       "mutating": true,
