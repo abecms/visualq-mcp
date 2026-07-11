@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.6 — 2026-07-11
+
+### Changed
+
+- MCP instructions: authenticated FRT flows use `requiresAuth` + LOGIN preamble — no inline sign-in steps; one `When` per scenario (`And` for chained actions); reuse ticket scenarios via `featureId`, never `forceCreate` duplicates.
+
+### Requirements
+
+- VisualQ backend must include `frt-mcp-scenario-normalize` and updated `create_frt_scenario` — deploy `visualq` before using auth/normalization in production.
+
 ## 1.0.4 — 2026-07-10
 
 ### Changed
