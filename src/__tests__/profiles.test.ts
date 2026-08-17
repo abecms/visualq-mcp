@@ -32,7 +32,8 @@ describe('toolsForProfile', () => {
     expect(names.has('tracking_get_audit_event_proof')).toBe(true)
     expect(names.has('tracking_prove_jira_ticket')).toBe(true)
     expect(names.has('tracking_discover_from_pages')).toBe(true)
-    expect(tools.length).toBe(43)
+    expect(names.has('frt_get_feature')).toBe(true)
+    expect(tools.length).toBe(44)
   })
 
   it('every qa profile tool name exists in manifest', () => {

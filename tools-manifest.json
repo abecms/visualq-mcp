@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "generatedAt": "2026-07-10T20:27:19.296Z",
+  "generatedAt": "2026-08-17T14:53:16.286Z",
   "tools": [
     {
       "name": "list_projects",
@@ -503,7 +503,7 @@
           },
           "runTracking": {
             "type": "boolean",
-            "description": "Run a fresh tracking audit (default true)"
+            "description": "Run tracking audit if no pass audit for this event+FRT exists within 7 days (default true; reuses fresh pass audits)"
           },
           "allowGenericFallback": {
             "type": "boolean",
@@ -1666,7 +1666,7 @@
     },
     {
       "name": "create_frt_scenario",
-      "description": "Create and persist an FRT functional test scenario in VisualQ from a plain-language goal. Call frt_find_scenarios first to reuse existing scenarios. User goal may be French; Gherkin steps are always English. For tracking payload checks use tracking_get_plan + run_tracking — do not put tracking verification in goal.",
+      "description": "Create and persist an FRT functional test scenario in VisualQ from a plain-language goal. Call frt_find_scenarios first to reuse existing scenarios. User goal may be French; Gherkin steps are always English. For authenticated flows: pass requiresAuth:true (or say \"logged in\" in goal) — MCP sets Requires authentication + LOGIN preamble; never inline sign-in steps. One When per scenario, additional actions use And. Reuse existing ticket scenarios (BN-XXX) via featureId — never forceCreate duplicates.",
       "source": "invoke",
       "phase": 3,
       "mutating": true,
@@ -1707,7 +1707,11 @@
           },
           "forceCreate": {
             "type": "boolean",
-            "description": "Skip resolve-first and always create a new scenario"
+            "description": "Skip resolve-first and always create a new scenario. Forbidden when a ticket-id scenario already exists (e.g. BN-448)."
+          },
+          "requiresAuth": {
+            "type": "boolean",
+            "description": "When true, enables Requires authentication on the scenario and runs the project LOGIN preamble — do not inline sign-in steps in goal. Inferred from goal when omitted (logged in, connecté, authenticated)."
           },
           "confirm": {
             "type": "boolean",

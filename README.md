@@ -1,6 +1,6 @@
 # @visualq/mcp
 
-MCP server for [VisualQ](https://visualq.ai) — the **Quality OS** agent interface. **`@visualq/mcp`** exposes **43 tools** (qa profile): multi-pillar audit, VRT/FRT, tracking plan + JIRA proof, rolling health. For Cursor, Claude Desktop, or any MCP client.
+MCP server for [VisualQ](https://visualq.ai) — the **Quality OS** agent interface. **`@visualq/mcp`** exposes **44 tools** (qa profile): multi-pillar audit, VRT/FRT (`frt_get_feature`), tracking plan + JIRA proof, rolling health. For Cursor, Claude Desktop, or any MCP client.
 
 ## Production setup (recommended)
 

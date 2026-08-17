@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.7 — 2026-08-17
+
+### Changed
+
+- Manifest regenerated from VisualQ 3.0 `MCP_QA_ALLOWLIST` (44 tools, includes `frt_get_feature`).
+- README and `visualq-agent` skill default to profile `qa`; FRT workflows use `create_frt_scenario` / `frt_get_feature` instead of draft/compile tools.
+
 ## 1.0.6 — 2026-07-11
 
 ### Changed

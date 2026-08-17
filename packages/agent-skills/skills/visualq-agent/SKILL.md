@@ -24,7 +24,7 @@ VisualQ is a **Quality OS**; **`@visualq/mcp`** is the agent interface for Curso
       "env": {
         "VISUALQ_API_KEY": "vq_org_live_…",
         "VISUALQ_BASE_URL": "https://visualq.ai",
-        "VISUALQ_TOOL_PROFILE": "vrt-qa"
+        "VISUALQ_TOOL_PROFILE": "qa"
       }
     }
   }
@@ -45,11 +45,10 @@ Always use `get_site_health` / `get_quality_score` for project KPIs. **Never** t
 
 1. `create_project` with `confirm: true`
 2. `crawl_site` (async — poll `get_job_status`)
-3. `generate_scenarios` from discovered URLs
+3. `create_scenario` from discovered URLs
 4. `run_baseline` with `confirm: true`
-5. `frt_propose_journey` for critical user flows (async)
-6. `frt_save_feature_draft` with `confirm: true`
-7. `check_setup_health` — summarize blockers
+5. `frt_find_scenarios` then `create_frt_scenario` (`goal`, `confirm: true`) for critical user flows
+6. `check_setup_health` — summarize blockers
 
 ## Workflow: PR quality gate (`pr-quality-gate` prompt)
 
@@ -62,10 +61,10 @@ Always use `get_site_health` / `get_quality_score` for project KPIs. **Never** t
 
 ## Workflow: FRT from user story (`frt-journey-from-goal` prompt)
 
-1. `frt_search_step_library` — reuse existing steps
-2. Optional: `frt_inspect_page` for grounded labels/selectors
-3. **`frt_save_feature_draft` with `confirm: true` immediately** — do not paste Gherkin for manual import
-4. `frt_compile_feature` with `project` — fix compile errors at source (prompts/binding), never silent fallback
+1. `frt_find_scenarios` — reuse `featureId` when matchScore >= 0.85 or same ticket id
+2. Optional: `frt_search_step_library` / `frt_inspect_page` for grounded labels
+3. **`create_frt_scenario` with `confirm: true`** — do not paste Gherkin for manual import
+4. `frt_get_feature` to read the persisted Gherkin
 5. `run_frt_feature` with `confirm: true`
 6. `frt_explain_failure` on any red steps
 
@@ -75,7 +74,7 @@ Always use `get_site_health` / `get_quality_score` for project KPIs. **Never** t
 2. `frt_get_feature_groups` — check existing coverage
 3. Create or update:
    - VRT: `create_scenario` with ticket id in label
-   - FRT: `frt_save_feature_draft` with ticket id in name/description
+   - FRT: `create_frt_scenario` with ticket id in name / `featureId` when updating
 4. `run_vrt` + `run_frt_feature` with `confirm: true`
 5. `gate_pr_quality` — attach verdict to PR comment via `post_pr_comment` if configured
 
@@ -96,7 +95,7 @@ Always use `get_site_health` / `get_quality_score` for project KPIs. **Never** t
 
 ## Workflow: Full quality audit
 
-Run per pillar: `run_vrt`, `run_perf`, `run_seo`, `run_a11y`, `run_security`, `run_tracking` — then `get_site_health`.
+`run_full_audit` with optional `pillars[]` → `wait_for_run` → `get_pillar_report` / `get_site_health`.
 
 ## FRT philosophy (no repair at runtime)
 
