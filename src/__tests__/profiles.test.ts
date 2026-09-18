@@ -42,4 +42,18 @@ describe('toolsForProfile', () => {
       expect(manifestNames.has(name), `qa references missing tool ${name}`).toBe(true)
     }
   })
+
+  it('project-scoped FRT diagnostics expose project selection', () => {
+    const toolNames = [
+      'frt_search_step_library',
+      'frt_inspect_page',
+      'frt_explain_failure',
+      'frt_heal_step_def',
+    ]
+
+    for (const name of toolNames) {
+      const tool = all.find(candidate => candidate.name === name)
+      expect(tool?.parameters.properties?.project, `${name} should accept project`).toBeDefined()
+    }
+  })
 })

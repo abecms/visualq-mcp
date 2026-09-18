@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "generatedAt": "2026-08-17T14:53:16.286Z",
+  "generatedAt": "2026-09-18T12:16:23.818Z",
   "tools": [
     {
       "name": "list_projects",
@@ -1140,6 +1140,14 @@
       "parameters": {
         "type": "object",
         "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
           "baseUrl": {
             "type": "string"
           },
@@ -1581,6 +1589,14 @@
       "parameters": {
         "type": "object",
         "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
           "query": {
             "type": "string"
           },
@@ -1600,6 +1616,14 @@
       "parameters": {
         "type": "object",
         "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
           "url": {
             "type": "string"
           },
@@ -1619,6 +1643,14 @@
       "parameters": {
         "type": "object",
         "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
           "runId": {
             "type": "string"
           },
@@ -1641,6 +1673,14 @@
       "parameters": {
         "type": "object",
         "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
           "stepDefId": {
             "type": "string"
           },
