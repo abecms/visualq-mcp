@@ -10,6 +10,13 @@ import { parseApiResponseBody } from './parse-response.js'
 const DEFAULT_POLL_INTERVAL_MS = 5_000
 const DEFAULT_MAX_POLL_MS = 300_000
 
+/** Statuses meaning the run has not reached a verdict yet (FRT runs start as `pending`). */
+const IN_PROGRESS_STATUSES = new Set(['pending', 'queued', 'running'])
+
+export function isRunInProgress(status: string | undefined | null): boolean {
+  return status == null || IN_PROGRESS_STATUSES.has(status)
+}
+
 export class VisualQApiError extends Error {
   constructor(
     message: string,
@@ -75,7 +82,7 @@ export class VisualQClient {
     while (Date.now() - start < maxMs) {
       await sleep(intervalMs)
       const status = await this.getRunStatus(runId)
-      if (status.status !== 'running') return status
+      if (!isRunInProgress(status.status)) return status
     }
 
     throw new VisualQApiError(`Run ${runId} did not complete within ${maxMs}ms`)
