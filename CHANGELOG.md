@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.1.0 — 2026-11-26
+
+### Added
+
+- `tracking_import_plan`: import a whole tracking plan (VisualQ standard .xlsx as base64, or plan JSON), merge or replace; creates the plan when the project has none.
+- `create_environment` / `update_environment`: manage project environments (base URL, custom user agent, custom headers, default flag). Org admin only.
+- `update_project`: project name, base URL, description, custom user agent and headers. Org admin only.
+
+### Changed
+
+- `tracking_update_plan` and `frt_save_feature_draft` (exact Gherkin, fixed step indexes for tracking links) join the `qa` profile.
+- Manifest regenerated: 50 tools.
+
 ## 1.0.7 — 2026-08-17
 
 ### Changed

@@ -1,6 +1,6 @@
 # @visualq/mcp
 
-MCP server for [VisualQ](https://visualq.ai) — the **Quality OS** agent interface. **`@visualq/mcp`** exposes **44 tools** (qa profile): multi-pillar audit, VRT/FRT (`frt_get_feature`), tracking plan + JIRA proof, rolling health. For Cursor, Claude Desktop, or any MCP client.
+MCP server for [VisualQ](https://visualq.ai) — the **Quality OS** agent interface. **`@visualq/mcp`** exposes **50 tools** (qa profile): multi-pillar audit, VRT/FRT (`frt_get_feature`), tracking plan import + JIRA proof, project environments, rolling health. For Cursor, Claude Desktop, or any MCP client.
 
 ## Production setup (recommended)
 
@@ -83,6 +83,8 @@ Org agent keys support **`mcp_read`** and **`mcp_full`** only.
 **Pre-merge VRT:** `list_scenarios` → `run_vrt` → `get_run_failures` → `explain_vrt_failure`
 
 **FRT in CI:** GitHub Action `type: frt` or `visualq frt --api-key …`
+
+**Tracking recette setup:** `tracking_import_plan` (standard .xlsx as base64, or plan JSON) → `create_environment` (base URL, user agent, headers) → `create_frt_scenario` or `frt_save_feature_draft` (exact Gherkin) → `tracking_link_event_frt` → `run_full_audit` with `pillars: ["tracking"]` → `tracking_get_audit_report`
 
 **Jira tracking proof:** read ticket → `tracking_prove_jira_ticket` with `confirm: true` (semantic intent → generic linked scenario) → paste `jiraMarkdown` into JIRA.
 

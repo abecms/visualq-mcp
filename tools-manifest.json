@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "generatedAt": "2026-09-18T12:16:23.818Z",
+  "generatedAt": "2026-11-26T07:15:46.460Z",
   "tools": [
     {
       "name": "list_projects",
@@ -931,6 +931,96 @@
       ]
     },
     {
+      "name": "tracking_update_plan",
+      "description": "Replace one or more tracking plan sections (pages, events, variables, …). Requires confirm: true and reason.",
+      "source": "invoke",
+      "phase": 3,
+      "mutating": true,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
+          "fields": {
+            "type": "object",
+            "description": "Partial plan sections to replace",
+            "properties": {
+              "conventions": {
+                "type": "object"
+              },
+              "pageTypes": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "eventTypes": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "pages": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "datalayerVariables": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "eventVariables": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "events": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "metadata": {
+                "type": "object"
+              },
+              "tmsConfig": {
+                "type": "object"
+              }
+            }
+          },
+          "reason": {
+            "type": "string",
+            "description": "Why this bulk update is applied"
+          },
+          "confirm": {
+            "type": "boolean",
+            "description": "Must be true for mutating tools"
+          }
+        },
+        "required": [
+          "fields",
+          "reason",
+          "confirm"
+        ]
+      },
+      "async": false,
+      "required": [
+        "fields",
+        "reason",
+        "confirm"
+      ]
+    },
+    {
       "name": "tracking_discover_from_pages",
       "description": "Bootstrap a tracking plan by visiting VRT pages and inferring datalayer variables. Only when no plan exists. confirm: true persists; omit or false returns preview.",
       "source": "invoke",
@@ -1288,6 +1378,198 @@
             "description": "Environment slug or id"
           }
         }
+      },
+      "async": false
+    },
+    {
+      "name": "create_environment",
+      "description": "Create an environment (e.g. Staging, Local) on a project: target base URL plus optional custom user agent and headers used by every run on it. Org admin only. Requires confirm: true.",
+      "source": "invoke",
+      "phase": 3,
+      "mutating": true,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name (slug derived from it), e.g. \"Staging\""
+          },
+          "baseUrl": {
+            "type": "string",
+            "description": "Absolute base URL runs on this environment target"
+          },
+          "customUserAgent": {
+            "type": "string",
+            "description": "User-Agent sent by the test browser (some sites hide content from HeadlessChrome)"
+          },
+          "customHeaders": {
+            "type": "object",
+            "description": "Extra HTTP headers, e.g. a WAF bypass header",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "color": {
+            "type": "string",
+            "description": "Badge color (one of the dashboard environment colors)"
+          },
+          "confirm": {
+            "type": "boolean",
+            "description": "Must be true for mutating tools"
+          }
+        },
+        "required": [
+          "name",
+          "baseUrl",
+          "confirm"
+        ]
+      },
+      "async": false
+    },
+    {
+      "name": "update_environment",
+      "description": "Update an environment (base URL, user agent, headers, name, default flag). Target it by id, slug or name. Org admin only. Requires confirm: true.",
+      "source": "invoke",
+      "phase": 3,
+      "mutating": true,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "targetEnvironment": {
+            "type": "string",
+            "description": "Environment to update: id, slug or name"
+          },
+          "name": {
+            "type": "string"
+          },
+          "baseUrl": {
+            "type": "string"
+          },
+          "customUserAgent": {
+            "type": "string",
+            "description": "Empty string clears it"
+          },
+          "customHeaders": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "color": {
+            "type": "string"
+          },
+          "isDefault": {
+            "type": "boolean",
+            "description": "true makes it the project default environment"
+          },
+          "confirm": {
+            "type": "boolean",
+            "description": "Must be true for mutating tools"
+          }
+        },
+        "required": [
+          "targetEnvironment",
+          "confirm"
+        ]
+      },
+      "async": false
+    },
+    {
+      "name": "update_project",
+      "description": "Update project settings: name, base URL (environments on the old URL follow), description, custom user agent and headers applied to runs. Org admin only. Requires confirm: true.",
+      "source": "invoke",
+      "phase": 3,
+      "mutating": true,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "name": {
+            "type": "string"
+          },
+          "baseUrl": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "customUserAgent": {
+            "type": "string",
+            "description": "Empty string clears it"
+          },
+          "customHeaders": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "confirm": {
+            "type": "boolean",
+            "description": "Must be true for mutating tools"
+          }
+        },
+        "required": [
+          "confirm"
+        ]
+      },
+      "async": false
+    },
+    {
+      "name": "tracking_import_plan",
+      "description": "Import a whole tracking plan into a project — creates it when none exists. Source: a VisualQ standard .xlsx as xlsxBase64 (sheets Conventions, Pages, Variables, Events, Event Variables), or a plan JSON object (same shape as tracking_get_plan). mode \"merge\" (default) merges into the existing plan, \"replace\" overwrites it. Requires confirm: true.",
+      "source": "invoke",
+      "phase": 3,
+      "mutating": true,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
+          "xlsxBase64": {
+            "type": "string",
+            "description": "Base64 of a VisualQ standard-format workbook (max 10 MB)"
+          },
+          "plan": {
+            "type": "object",
+            "description": "Tracking plan JSON: { metadata?, conventions?, pages[], events[], datalayerVariables?, eventVariables? }"
+          },
+          "fileName": {
+            "type": "string",
+            "description": "Source name stored in plan metadata"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "merge",
+              "replace"
+            ],
+            "description": "Default merge"
+          },
+          "confirm": {
+            "type": "boolean",
+            "description": "Must be true for mutating tools"
+          }
+        },
+        "required": [
+          "confirm"
+        ]
       },
       "async": false
     },
@@ -1760,6 +2042,55 @@
         },
         "required": [
           "goal",
+          "confirm"
+        ]
+      },
+      "async": false
+    },
+    {
+      "name": "frt_save_feature_draft",
+      "description": "Save pre-written Gherkin or update an existing FRT feature. For new scenarios from natural language, use create_frt_scenario instead.",
+      "source": "invoke",
+      "phase": 3,
+      "mutating": true,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with API key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
+          "featureId": {
+            "type": "string",
+            "description": "Existing feature id (omit to create)"
+          },
+          "name": {
+            "type": "string",
+            "description": "Feature display name"
+          },
+          "gherkin": {
+            "type": "string",
+            "description": "Full .feature Gherkin source"
+          },
+          "description": {
+            "type": "string"
+          },
+          "baseUrl": {
+            "type": "string",
+            "description": "Start URL for the feature"
+          },
+          "confirm": {
+            "type": "boolean",
+            "description": "Must be true for mutating tools"
+          }
+        },
+        "required": [
+          "name",
+          "gherkin",
           "confirm"
         ]
       },

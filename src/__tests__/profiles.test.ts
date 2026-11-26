@@ -12,7 +12,9 @@ describe('toolsForProfile', () => {
     expect(names.has('create_frt_scenario')).toBe(true)
     expect(names.has('run_tracking')).toBe(false)
     expect(names.has('run_a11y')).toBe(false)
-    expect(names.has('frt_save_feature_draft')).toBe(false)
+    expect(names.has('frt_save_feature_draft')).toBe(true)
+    expect(names.has('tracking_import_plan')).toBe(true)
+    expect(names.has('create_environment')).toBe(true)
   })
 
   it('legacy vrt-qa alias maps to qa toolset', () => {
@@ -33,7 +35,7 @@ describe('toolsForProfile', () => {
     expect(names.has('tracking_prove_jira_ticket')).toBe(true)
     expect(names.has('tracking_discover_from_pages')).toBe(true)
     expect(names.has('frt_get_feature')).toBe(true)
-    expect(tools.length).toBe(44)
+    expect(tools.length).toBe(50)
   })
 
   it('every qa profile tool name exists in manifest', () => {
