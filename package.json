@@ -1,7 +1,7 @@
 {
   "name": "@visualq/mcp",
-  "version": "1.1.0",
-  "description": "MCP server for VisualQ — qa profile (50 tools): run_full_audit, VRT/FRT, tracking plan import, environments, tracking proof, investigation ladder, rolling health",
+  "version": "1.2.0",
+  "description": "MCP server for VisualQ — agent-verify profile (start_verification, verify_change) and qa profile (53 tools): run_full_audit, VRT/FRT, tracking plan import, environments, tracking proof, investigation ladder, rolling health",
   "type": "module",
   "bin": {
     "visualq-mcp": "dist/index.js"

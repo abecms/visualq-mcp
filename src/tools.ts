@@ -1,63 +1,120 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
-import { z } from 'zod'
+import { CallToolRequestSchema, ListToolsRequestSchema, type CallToolResult, type Tool } from '@modelcontextprotocol/sdk/types.js'
 import type { VisualQClient } from './api-client/index.js'
 import type { ManifestTool } from './manifest.js'
 
-function jsonText(value: unknown): { content: Array<{ type: 'text'; text: string }> } {
+type ToolContent = CallToolResult['content']
+
+function jsonText(value: unknown): CallToolResult {
   return {
     content: [{ type: 'text', text: JSON.stringify(value, null, 2) }],
   }
 }
 
-function baseArgsSchema(tool: ManifestTool) {
-  const shape: Record<string, z.ZodTypeAny> = {}
-  const props = (tool.parameters.properties ?? {}) as Record<string, Record<string, unknown>>
+/**
+ * Full JSON Schema passed through unchanged (required, enums, descriptions,
+ * nested objects, anyOf). The previous zod conversion made every argument an
+ * optional string/array/record and dropped all of that.
+ */
+export function toInputSchema(tool: ManifestTool): Tool['inputSchema'] {
+  const params = (tool.parameters ?? {}) as Record<string, unknown>
+  const required = Array.from(new Set([
+    ...(Array.isArray(params.required) ? params.required as string[] : []),
+    ...(tool.required ?? []),
+  ]))
+  return {
+    ...params,
+    type: 'object',
+    properties: (params.properties ?? {}) as Record<string, object>,
+    ...(required.length ? { required } : {}),
+  }
+}
 
-  for (const [key, spec] of Object.entries(props)) {
-    if (spec.type === 'string') {
-      shape[key] = z.string().optional()
-    } else if (spec.type === 'array') {
-      shape[key] = z.array(z.string()).optional()
-    } else if (spec.type === 'number') {
-      shape[key] = z.number().optional()
-    } else if (spec.type === 'boolean') {
-      shape[key] = z.boolean().optional()
-    } else if (spec.type === 'object') {
-      shape[key] = z.record(z.unknown()).optional()
-    }
+export function toMcpTool(tool: ManifestTool): Tool {
+  return {
+    name: tool.name,
+    description: tool.description,
+    inputSchema: toInputSchema(tool),
+    ...(tool.outputSchema ? { outputSchema: { ...tool.outputSchema, type: 'object' } as Tool['outputSchema'] } : {}),
+    annotations: { readOnlyHint: !tool.mutating },
+  }
+}
+
+interface InlineImage { ref: string; mimeType: string; data: string }
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+/**
+ * Invoke responses → MCP result. `data.inlineImages` become image blocks (not
+ * base64 inside the JSON); tools with an outputSchema get `structuredContent`.
+ */
+export function toCallToolResult(tool: ManifestTool, response: unknown): CallToolResult {
+  const res: Record<string, unknown> = isRecord(response) ? { ...response } : { ok: false, error: 'Invalid response' }
+  const data = isRecord(res.data) ? { ...res.data } : res.data
+  const images: InlineImage[] = isRecord(data) && Array.isArray(data.inlineImages)
+    ? (data.inlineImages as unknown[]).filter((i): i is InlineImage =>
+      isRecord(i) && typeof i.data === 'string' && typeof i.mimeType === 'string' && typeof i.ref === 'string')
+    : []
+  if (isRecord(data) && 'inlineImages' in data) {
+    delete data.inlineImages
+    data.inlineImageRefs = images.map(i => i.ref)
+  }
+  res.data = data
+
+  const content: ToolContent = [{ type: 'text', text: JSON.stringify(res, null, 2) }]
+  for (const img of images) {
+    content.push({ type: 'text', text: `Evidence ${img.ref}:` })
+    content.push({ type: 'image', data: img.data, mimeType: img.mimeType })
   }
 
-  return z.object(shape)
+  const ok = res.ok !== false
+  const result: CallToolResult = { content, ...(ok ? {} : { isError: true }) }
+  if (tool.outputSchema && ok && isRecord(data)) {
+    result.structuredContent = {
+      ...data,
+      ...(Array.isArray(res.nextActions) ? { nextActions: res.nextActions } : {}),
+    }
+  }
+  return result
 }
 
 export function registerTools(server: McpServer, client: VisualQClient, tools: ManifestTool[]) {
-  for (const tool of tools) {
-    const schema = baseArgsSchema(tool)
+  const byName = new Map(tools.map(t => [t.name, t]))
+  const low = server.server
+  low.registerCapabilities({ tools: { listChanged: false } })
 
-    server.tool(tool.name, tool.description, schema.shape as z.ZodRawShape, async (args: Record<string, unknown>) => {
-      try {
-        const resolvedArgs = client.applyToolDefaults(args)
-        switch (tool.source) {
-          case 'ci':
-            return await handleCiTool(client, tool.name, resolvedArgs)
-          case 'client':
-            return await handleClientTool(client, tool.name, resolvedArgs)
-          case 'invoke': {
-            const cleanArgs = Object.fromEntries(
-              Object.entries(resolvedArgs).filter(([, v]) => v !== undefined),
-            )
-            const result = await client.invokeTool(tool.name, cleanArgs)
-            return jsonText(result)
-          }
-          default:
-            return jsonText({ ok: false, error: `Unknown tool source for ${tool.name}` })
+  low.setRequestHandler(ListToolsRequestSchema, async () => ({ tools: tools.map(toMcpTool) }))
+
+  low.setRequestHandler(CallToolRequestSchema, async (request): Promise<CallToolResult> => {
+    const tool = byName.get(request.params.name)
+    if (!tool) {
+      return { ...jsonText({ ok: false, error: `Unknown tool: ${request.params.name}` }), isError: true }
+    }
+    const args = (request.params.arguments ?? {}) as Record<string, unknown>
+    try {
+      const resolvedArgs = client.applyToolDefaults(args)
+      switch (tool.source) {
+        case 'ci':
+          return await handleCiTool(client, tool.name, resolvedArgs)
+        case 'client':
+          return await handleClientTool(client, tool.name, resolvedArgs)
+        case 'invoke': {
+          const cleanArgs = Object.fromEntries(
+            Object.entries(resolvedArgs).filter(([, v]) => v !== undefined),
+          )
+          const result = await client.invokeTool(tool.name, cleanArgs)
+          return toCallToolResult(tool, result)
         }
-      } catch (err) {
-        const message = err instanceof Error ? err.message : String(err)
-        return jsonText({ ok: false, error: message })
+        default:
+          return { ...jsonText({ ok: false, error: `Unknown tool source for ${tool.name}` }), isError: true }
       }
-    })
-  }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err)
+      return { ...jsonText({ ok: false, error: message }), isError: true }
+    }
+  })
 }
 
 async function handleCiTool(client: VisualQClient, name: string, args: Record<string, unknown>) {

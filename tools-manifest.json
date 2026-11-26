@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "generatedAt": "2026-11-26T07:15:46.460Z",
+  "generatedAt": "2026-11-26T12:42:31.396Z",
   "tools": [
     {
       "name": "list_projects",
@@ -1572,6 +1572,831 @@
         ]
       },
       "async": false
+    },
+    {
+      "name": "start_verification",
+      "description": "Call at the START of a UI task, before coding. Freezes acceptance criteria from the ticket / PR / spec (VisualQ extracts them; do not rephrase), compiles the flow and captures the BEFORE state on referenceUrl. Returns contractId for verify_change.",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "required": [
+          "intent"
+        ],
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with a project-bound key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
+          "intent": {
+            "type": "string",
+            "description": "Task goal in one sentence (traceability; never shown to the judge)."
+          },
+          "criteriaSources": {
+            "type": "object",
+            "description": "Where acceptance criteria come from. Pass the source, not your own summary.",
+            "properties": {
+              "prUrl": {
+                "type": "string",
+                "description": "GitHub PR URL in the project repo (GitHub integration required)."
+              },
+              "issueUrl": {
+                "type": "string",
+                "description": "GitHub issue URL in the project repo."
+              },
+              "jiraKey": {
+                "type": "string",
+                "description": "Jira key; with specText, criteria are marked ticket_via_agent."
+              },
+              "specText": {
+                "type": "string",
+                "description": "Ticket/spec text copied verbatim (from a human or your Jira MCP)."
+              },
+              "specPath": {
+                "type": "string",
+                "description": "Local runner only (not available yet)."
+              }
+            }
+          },
+          "agentCriteria": {
+            "type": "array",
+            "maxItems": 10,
+            "items": {
+              "type": "string"
+            },
+            "description": "Your own criteria. Always marked agent_authored; never enough to pass."
+          },
+          "referenceUrl": {
+            "type": "string",
+            "description": "Public URL of the BEFORE state (production, preview of main). localhost is not reachable yet."
+          },
+          "flow": {
+            "type": "object",
+            "description": "Journey executed before judging: real user interactions only (no JavaScript). Write each expect BEFORE the action.",
+            "properties": {
+              "steps": {
+                "type": "array",
+                "maxItems": 20,
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "do"
+                  ],
+                  "properties": {
+                    "do": {
+                      "type": "string",
+                      "description": "One interaction: \"open /product/42\", \"click 'Add to cart'\", \"type 'a@b.c' in 'Email'\", \"select 'FR' in 'Country'\", \"press Enter\", \"wait 1s\"."
+                    },
+                    "expect": {
+                      "type": "string",
+                      "description": "Observable result: \"'Added to cart' is visible\", \"'Cart' shows '1'\", \"url contains /checkout\". Free text is judged visually."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "viewports": {
+            "type": "array",
+            "maxItems": 3,
+            "description": "Default [\"desktop\"]. phone=390×844, tablet=768×1024, desktop=1280×800.",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "phone",
+                    "tablet",
+                    "desktop"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "width",
+                    "height"
+                  ],
+                  "properties": {
+                    "width": {
+                      "type": "number"
+                    },
+                    "height": {
+                      "type": "number"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "requireHumanApproval": {
+            "type": "boolean",
+            "description": "A human must approve the contract in VisualQ before a verification can pass."
+          },
+          "context": {
+            "type": "object",
+            "description": "Traceability only — never shown to the judge.",
+            "properties": {
+              "commitSha": {
+                "type": "string"
+              },
+              "branch": {
+                "type": "string"
+              },
+              "prUrl": {
+                "type": "string"
+              },
+              "jiraKey": {
+                "type": "string"
+              },
+              "agentName": {
+                "type": "string"
+              },
+              "agentSessionId": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "async": false,
+      "required": [
+        "intent"
+      ]
+    },
+    {
+      "name": "verify_change",
+      "description": "Call at the END of a UI task. Replays the contract flow on the changed page, compares with the BEFORE state, judges each criterion with positive evidence and returns a computed verdict: passed | failed | uncertain | blocked | error. Only declare the task done on passed.",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with a project-bound key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
+          "url": {
+            "type": "string",
+            "description": "Public URL of the changed page (preview deployment, staging). localhost / private IPs: not reachable yet."
+          },
+          "contractId": {
+            "type": "string",
+            "description": "Recommended. Criteria, flow, viewports and the BEFORE state come from the contract and cannot be changed here."
+          },
+          "intent": {
+            "type": "string",
+            "description": "Without contract only."
+          },
+          "agentCriteria": {
+            "type": "array",
+            "maxItems": 10,
+            "items": {
+              "type": "string"
+            },
+            "description": "Without contract only — agent_authored, best verdict uncertain."
+          },
+          "compareTo": {
+            "type": "string",
+            "description": "Without contract: reference URL captured in the same run (production, preview of main)."
+          },
+          "flow": {
+            "type": "object",
+            "description": "Journey executed before judging: real user interactions only (no JavaScript). Write each expect BEFORE the action.",
+            "properties": {
+              "steps": {
+                "type": "array",
+                "maxItems": 20,
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "do"
+                  ],
+                  "properties": {
+                    "do": {
+                      "type": "string",
+                      "description": "One interaction: \"open /product/42\", \"click 'Add to cart'\", \"type 'a@b.c' in 'Email'\", \"select 'FR' in 'Country'\", \"press Enter\", \"wait 1s\"."
+                    },
+                    "expect": {
+                      "type": "string",
+                      "description": "Observable result: \"'Added to cart' is visible\", \"'Cart' shows '1'\", \"url contains /checkout\". Free text is judged visually."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "viewports": {
+            "type": "array",
+            "maxItems": 3,
+            "description": "Default [\"desktop\"]. phone=390×844, tablet=768×1024, desktop=1280×800.",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "phone",
+                    "tablet",
+                    "desktop"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "width",
+                    "height"
+                  ],
+                  "properties": {
+                    "width": {
+                      "type": "number"
+                    },
+                    "height": {
+                      "type": "number"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "checks": {
+            "type": "object",
+            "properties": {
+              "console": {
+                "type": "string",
+                "enum": [
+                  "delta",
+                  "absolute",
+                  "off"
+                ],
+                "default": "delta",
+                "description": "delta: only errors absent from the BEFORE state count."
+              },
+              "network": {
+                "type": "boolean",
+                "default": true
+              },
+              "dialogs": {
+                "type": "boolean",
+                "default": true,
+                "description": "Record native alert/confirm/prompt."
+              },
+              "a11y": {
+                "type": "string",
+                "enum": [
+                  "off",
+                  "serious",
+                  "all"
+                ],
+                "default": "serious"
+              },
+              "visualDiff": {
+                "type": "object",
+                "properties": {
+                  "mode": {
+                    "type": "string",
+                    "enum": [
+                      "auto",
+                      "off"
+                    ],
+                    "default": "auto"
+                  },
+                  "expectedChangeArea": {
+                    "type": "string",
+                    "enum": [
+                      "auto",
+                      "page",
+                      "none"
+                    ],
+                    "default": "auto",
+                    "description": "auto: area of the elements the flow touched. none: any visual change fails (refactor)."
+                  }
+                }
+              }
+            }
+          },
+          "judge": {
+            "type": "string",
+            "enum": [
+              "visualq",
+              "agent",
+              "off"
+            ],
+            "default": "visualq",
+            "description": "agent: you judge from the returned evidence — verdict capped at uncertain."
+          },
+          "auth": {
+            "type": "object",
+            "description": "Not resolvable by the cloud runner yet: any auth makes the verification `blocked` so a human can step in. Never put passwords in arguments.",
+            "properties": {
+              "useProjectLogin": {
+                "type": "boolean"
+              },
+              "storageStatePath": {
+                "type": "string",
+                "description": "Local runner only."
+              },
+              "secretRefs": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Names of secrets, never values."
+              }
+            }
+          },
+          "evidence": {
+            "type": "object",
+            "properties": {
+              "inlineScreenshots": {
+                "type": "number",
+                "default": 3,
+                "maximum": 6
+              },
+              "video": {
+                "type": "string",
+                "enum": [
+                  "off",
+                  "always"
+                ],
+                "default": "always"
+              },
+              "trace": {
+                "type": "string",
+                "enum": [
+                  "off",
+                  "always"
+                ],
+                "default": "always"
+              }
+            }
+          },
+          "freshness": {
+            "type": "object",
+            "properties": {
+              "expectBuildMarker": {
+                "type": "string",
+                "description": "Text present in the HTML only in the new build (e.g. the commit sha in a meta tag)."
+              },
+              "readyTimeoutMs": {
+                "type": "number",
+                "default": 30000
+              }
+            }
+          },
+          "waitMs": {
+            "type": "number",
+            "default": 90000,
+            "maximum": 280000,
+            "description": "Beyond this, status=running: call get_verification."
+          },
+          "context": {
+            "type": "object",
+            "description": "Traceability only — never shown to the judge.",
+            "properties": {
+              "commitSha": {
+                "type": "string"
+              },
+              "branch": {
+                "type": "string"
+              },
+              "prUrl": {
+                "type": "string"
+              },
+              "jiraKey": {
+                "type": "string"
+              },
+              "agentName": {
+                "type": "string"
+              },
+              "agentSessionId": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "async": false,
+      "required": [
+        "url"
+      ],
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "verificationId",
+          "status",
+          "summary",
+          "criteria",
+          "issues"
+        ],
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "verificationId": {
+            "type": "string"
+          },
+          "contractId": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "passed",
+              "failed",
+              "uncertain",
+              "blocked",
+              "running",
+              "error"
+            ]
+          },
+          "summary": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "runner": {
+            "type": "string",
+            "enum": [
+              "cloud",
+              "local"
+            ]
+          },
+          "provenance": {
+            "type": "string",
+            "enum": [
+              "cloud_attested",
+              "cloud_unsigned",
+              "local_unattested"
+            ]
+          },
+          "judge": {
+            "type": "string",
+            "enum": [
+              "visualq",
+              "agent",
+              "off"
+            ]
+          },
+          "durationMs": {
+            "type": "number"
+          },
+          "criteria": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "criterion": {
+                  "type": "string"
+                },
+                "origin": {
+                  "type": "string",
+                  "enum": [
+                    "ticket",
+                    "ticket_via_agent",
+                    "pr",
+                    "spec",
+                    "human",
+                    "agent_authored"
+                  ]
+                },
+                "verdict": {
+                  "type": "string",
+                  "enum": [
+                    "met",
+                    "unmet",
+                    "undetermined",
+                    "not_observable",
+                    "conflict"
+                  ]
+                },
+                "basis": {
+                  "type": "string",
+                  "enum": [
+                    "dom",
+                    "judge_x2",
+                    "dom+judge",
+                    "judge_x1",
+                    "none"
+                  ]
+                },
+                "reason": {
+                  "type": "string"
+                },
+                "evidenceRefs": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "issues": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "severity": {
+                  "type": "string",
+                  "enum": [
+                    "blocker",
+                    "major",
+                    "minor"
+                  ]
+                },
+                "kind": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "viewport": {
+                  "type": "string"
+                },
+                "step": {
+                  "type": "number"
+                },
+                "criterionId": {
+                  "type": "string"
+                },
+                "evidenceRefs": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "flow": {
+            "type": "object"
+          },
+          "signals": {
+            "type": "object"
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "manifest": {
+            "type": "object"
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "get_verification",
+      "description": "Read a verification: status, verdict, evidence (fresh signed URLs) and optional heavy details. Use it to collect a running verification.",
+      "source": "invoke",
+      "phase": 2,
+      "mutating": false,
+      "parameters": {
+        "type": "object",
+        "required": [
+          "verificationId"
+        ],
+        "properties": {
+          "project": {
+            "type": "string",
+            "description": "Project slug or id (optional with a project-bound key)"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment slug or id"
+          },
+          "verificationId": {
+            "type": "string"
+          },
+          "include": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "console",
+                "network",
+                "a11y",
+                "dom",
+                "judgeTranscript"
+              ]
+            }
+          },
+          "waitMs": {
+            "type": "number",
+            "default": 0,
+            "maximum": 280000,
+            "description": "Wait up to this long while status is running."
+          },
+          "inlineScreenshots": {
+            "type": "number",
+            "default": 3,
+            "maximum": 6
+          }
+        }
+      },
+      "async": false,
+      "required": [
+        "verificationId"
+      ],
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "verificationId",
+          "status",
+          "summary",
+          "criteria",
+          "issues"
+        ],
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "verificationId": {
+            "type": "string"
+          },
+          "contractId": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "passed",
+              "failed",
+              "uncertain",
+              "blocked",
+              "running",
+              "error"
+            ]
+          },
+          "summary": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "runner": {
+            "type": "string",
+            "enum": [
+              "cloud",
+              "local"
+            ]
+          },
+          "provenance": {
+            "type": "string",
+            "enum": [
+              "cloud_attested",
+              "cloud_unsigned",
+              "local_unattested"
+            ]
+          },
+          "judge": {
+            "type": "string",
+            "enum": [
+              "visualq",
+              "agent",
+              "off"
+            ]
+          },
+          "durationMs": {
+            "type": "number"
+          },
+          "criteria": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "criterion": {
+                  "type": "string"
+                },
+                "origin": {
+                  "type": "string",
+                  "enum": [
+                    "ticket",
+                    "ticket_via_agent",
+                    "pr",
+                    "spec",
+                    "human",
+                    "agent_authored"
+                  ]
+                },
+                "verdict": {
+                  "type": "string",
+                  "enum": [
+                    "met",
+                    "unmet",
+                    "undetermined",
+                    "not_observable",
+                    "conflict"
+                  ]
+                },
+                "basis": {
+                  "type": "string",
+                  "enum": [
+                    "dom",
+                    "judge_x2",
+                    "dom+judge",
+                    "judge_x1",
+                    "none"
+                  ]
+                },
+                "reason": {
+                  "type": "string"
+                },
+                "evidenceRefs": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "issues": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "severity": {
+                  "type": "string",
+                  "enum": [
+                    "blocker",
+                    "major",
+                    "minor"
+                  ]
+                },
+                "kind": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "viewport": {
+                  "type": "string"
+                },
+                "step": {
+                  "type": "number"
+                },
+                "criterionId": {
+                  "type": "string"
+                },
+                "evidenceRefs": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "flow": {
+            "type": "object"
+          },
+          "signals": {
+            "type": "object"
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "manifest": {
+            "type": "object"
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
     },
     {
       "name": "get_diff_stats",

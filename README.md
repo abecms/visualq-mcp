@@ -56,7 +56,7 @@ Pass `project` on every tool call (slug or id), e.g. `"project": "afp-com"`.
 | `VISUALQ_API_KEY` | yes | — | Org agent key `vq_org_live_…` or legacy project key `vq_live_…` |
 | `VISUALQ_BASE_URL` | no | `https://visualq.ai` | VisualQ instance (use your origin for self-hosted) |
 | `VISUALQ_DEFAULT_PROJECT` | no | — | Default project slug injected into tool args |
-| `VISUALQ_TOOL_PROFILE` | no | `qa` | `qa` (recommended), `full`, or legacy aliases `vrt-qa` / `frt-qa` / `tracking-qa` → `qa` |
+| `VISUALQ_TOOL_PROFILE` | no | `qa` | `qa` (recommended), `agent-verify` (verification loop only, for coding agents), `full`, or legacy aliases `vrt-qa` / `frt-qa` / `tracking-qa` → `qa` |
 | `VISUALQ_MCP_HTTP` | no | — | Set `1` to run local Streamable HTTP on `127.0.0.1:3847` |
 | `VISUALQ_MCP_PORT` | no | `3847` | HTTP mode port |
 
@@ -71,6 +71,13 @@ Pass `project` on every tool call (slug or id), e.g. `"project": "afp-com"`.
 Org agent keys support **`mcp_read`** and **`mcp_full`** only.
 
 ## Typical agent workflows
+
+**Verify a coding agent's UI change (`agent-verify` profile):**
+1. Before coding — `start_verification({ intent, criteriaSources: { prUrl | issueUrl | specText }, referenceUrl, flow: { steps: [{ do, expect }] } })` → `contractId`. Criteria come from the ticket/PR/spec; criteria the agent writes are marked `agent_authored` and can never be enough to pass.
+2. After coding — `verify_change({ contractId, url })` on a public preview URL. The verdict is computed (`passed | failed | uncertain | blocked | error`), each criterion needs positive evidence (DOM check, or two concordant visual judgments), and the result carries image blocks plus `structuredContent`.
+3. `running` → `get_verification({ verificationId, waitMs })`.
+
+Only `passed` means done. localhost is not reachable by the cloud runner yet.
 
 **Quality MCP PR gate:** `gate_pr_quality` → fix with `explain_vrt_failure` / `frt_heal_step_def` → `run_vrt` or `run_full_audit`
 

@@ -8,6 +8,7 @@ export interface ManifestTool {
   mutating: boolean
   parameters: Record<string, unknown>
   required?: string[]
+  outputSchema?: Record<string, unknown>
 }
 
 export interface ToolsManifest {

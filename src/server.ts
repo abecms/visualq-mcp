@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url'
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { createClientFromEnv, VisualQClient } from './api-client/index.js'
-import { MCP_SERVER_INSTRUCTIONS } from './instructions.js'
+import { instructionsForProfile } from './instructions.js'
 import { manifestTools } from './manifest.js'
 import { registerPrompts } from './prompts.js'
 import { registerResources } from './resources.js'
@@ -15,15 +15,16 @@ const PACKAGE_VERSION = JSON.parse(
 ) as { version: string }
 
 export function createMcpServer(client: VisualQClient, profile?: string): McpServer {
+  const resolvedProfile = profile ?? process.env.VISUALQ_TOOL_PROFILE
   const server = new McpServer(
     {
       name: 'visualq',
       version: PACKAGE_VERSION.version,
     },
-    { instructions: MCP_SERVER_INSTRUCTIONS },
+    { instructions: instructionsForProfile(resolvedProfile) },
   )
 
-  registerTools(server, client, manifestTools(profile ?? process.env.VISUALQ_TOOL_PROFILE))
+  registerTools(server, client, manifestTools(resolvedProfile))
   registerResources(server, client)
   registerPrompts(server)
 

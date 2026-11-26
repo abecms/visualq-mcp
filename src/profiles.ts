@@ -1,6 +1,9 @@
 import type { ManifestTool } from './manifest.js'
 
-export type ToolProfileName = 'qa' | 'vrt-qa' | 'frt-qa' | 'tracking-qa' | 'full'
+export type ToolProfileName = 'qa' | 'agent-verify' | 'vrt-qa' | 'frt-qa' | 'tracking-qa' | 'full'
+
+/** VisualQ Verify loop (plan-verify-change §4). */
+export const VERIFY_TOOLS = ['start_verification', 'verify_change', 'get_verification'] as const
 
 /** Subset of tools per agent persona — filters manifest at MCP startup only.
  *  Keep in sync with visualq/src/lib/mcp/mcp-invoke-config.ts MCP_QA_ALLOWLIST */
@@ -56,7 +59,11 @@ export const TOOL_PROFILES: Record<ToolProfileName, readonly string[] | null> = 
     'frt_inspect_page',
     'frt_search_step_library',
     'post_pr_comment',
+    ...VERIFY_TOOLS,
   ],
+  /** Last verification step for coding agents (Claude Code, Cursor, Hermes…).
+   *  Keep in sync with visualq/src/lib/mcp/mcp-invoke-config.ts MCP_AGENT_VERIFY_ALLOWLIST */
+  'agent-verify': ['list_projects', ...VERIFY_TOOLS],
   /** @deprecated use qa */
   'vrt-qa': null,
   /** @deprecated use qa */

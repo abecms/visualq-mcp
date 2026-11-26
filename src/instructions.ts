@@ -1,3 +1,17 @@
+/** agent-verify profile — replaces the QA/tracking instructions (plan-verify-change §8). */
+export const MCP_AGENT_VERIFY_INSTRUCTIONS = [
+  'VisualQ Verify — no UI task is declared done without a VisualQ verdict.',
+  '1. At the START of a UI task: start_verification(intent, criteriaSources: ticket/PR/spec, referenceUrl, flow with an expect per step).',
+  '   Do not rephrase the ticket criteria: pass the source (prUrl, issueUrl, or specText copied verbatim).',
+  '2. At the END: verify_change(contractId, url of the public preview).',
+  '3. failed: read issues + images, fix, re-run with the SAME contractId. Never change the contract to pass.',
+  '4. blocked: stop and tell the human what is missing (secret, OTP, contradictory criteria).',
+  '5. uncertain: do NOT declare the task done; show summary, images and evidence to the human.',
+  '6. passed: attach the verificationId and evidence links to your report or PR.',
+  '7. running: call get_verification(verificationId, waitMs).',
+  'Never put passwords in arguments. localhost is not reachable by the cloud runner yet: verify a preview URL.',
+].join('\n')
+
 /** MCP server.instructions — built-in hints for IDE agents. */
 export const MCP_SERVER_INSTRUCTIONS = [
   'VisualQ Quality MCP — create FRT scenarios in VisualQ, run VRT/FRT, rolling page health, multi-pillar audits.',
@@ -40,4 +54,12 @@ export const MCP_SERVER_INSTRUCTIONS = [
   'Follow nextActions in tool responses when present.',
   'FRT: fix failures at source (prompts, binding, step catalog) — no silent selector swaps on system.* steps.',
   'Org agent keys (vq_org_live_) use MCP tools only. Project CI keys (vq_live_) are for GitHub Actions /api/ci/*.',
+  '',
+  '>>> VERIFY AN AGENT CHANGE <<<',
+  'Before coding a UI change: start_verification(intent, criteriaSources, referenceUrl, flow). After: verify_change(contractId, url).',
+  'Declare the task done only on status=passed; on uncertain/blocked hand over to a human.',
 ].join('\n')
+
+export function instructionsForProfile(profile: string | undefined): string {
+  return profile === 'agent-verify' ? MCP_AGENT_VERIFY_INSTRUCTIONS : MCP_SERVER_INSTRUCTIONS
+}
