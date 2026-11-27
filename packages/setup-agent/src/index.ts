@@ -1,9 +1,13 @@
 #!/usr/bin/env node
 import { installForClaude, installForCursor, installManual } from './install.js'
 import { buildCursorDeeplink, type SetupOptions } from './mcp-config.js'
+import { installVerifyGate } from './verify-gate.js'
 
 function printHelp(): void {
-  console.log(`Usage: visualq-setup-agent <cursor|claude|manual> [options]
+  console.log(`Usage: visualq-setup-agent <cursor|claude|manual|verify-gate> [options]
+
+  verify-gate   In the current repo: Claude Code Stop hook that refuses "done" after UI edits
+                without a VisualQ verdict, plus the rule in CLAUDE.md and AGENTS.md (no key needed).
 
 Install VisualQ MCP config, skills, and rules.
 
@@ -55,6 +59,16 @@ function parseArgs(argv: string[]) {
 
 async function main(): Promise<void> {
   const { target, options, deeplinkOnly } = parseArgs(process.argv.slice(2))
+
+  if (target === 'verify-gate') {
+    const p = installVerifyGate(process.cwd())
+    console.log('VisualQ verify gate installed:')
+    console.log(`  Hook:     ${p.hookPath}`)
+    console.log(`  Settings: ${p.settingsPath}`)
+    console.log(`  Rules:    ${p.claudeMd}, ${p.agentsMd}`)
+    console.log('Disable for one session with VISUALQ_VERIFY_GATE=off.')
+    return
+  }
 
   if (deeplinkOnly) {
     console.log(buildCursorDeeplink(options))

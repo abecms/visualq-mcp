@@ -9,6 +9,7 @@ export const MCP_AGENT_VERIFY_INSTRUCTIONS = [
   '5. uncertain: do NOT declare the task done; show summary, images and evidence to the human.',
   '6. passed: attach the verificationId and evidence links to your report or PR.',
   '7. running: call get_verification(verificationId, waitMs).',
+  '8. If the task asks for information (a question, a value, a list), pass your final answer in verify_change.answer: it is checked against the evidence.',
   'Never put passwords in arguments. localhost is not reachable by the cloud runner yet: verify a preview URL.',
 ].join('\n')
 

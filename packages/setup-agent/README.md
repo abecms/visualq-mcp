@@ -14,6 +14,9 @@ npx @visualq/setup-agent claude --key vq_org_live_…
 # Project-scoped (.cursor/ in repo)
 npx @visualq/setup-agent manual --key vq_org_live_… --project my-site
 
+# Enforce verification in this repo (Claude Code Stop hook + CLAUDE.md/AGENTS.md rule)
+npx @visualq/setup-agent verify-gate
+
 # Cursor deeplink only (no file writes)
 npx @visualq/setup-agent cursor --deeplink --profile vrt-qa
 ```
